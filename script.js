@@ -35,6 +35,15 @@ function displayNotes(){
     let container = document.getElementById("notesContainer");
     container.innerHTML = "";
 
+    if (notes.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <p>No notes found. Start by adding your first note above!</p>
+            </div>
+        `;
+        return;
+    }
+
     notes.forEach((note,index)=>{
         container.innerHTML += `
             <div class="note">
