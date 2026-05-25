@@ -3,7 +3,10 @@ let notes = JSON.parse(localStorage.getItem("notes")) || [];
 // Data Migration
 notes = notes.map((note, index) => {
     if (typeof note === "string") {
-        return { id: Date.now() + index, text: note, status: 'todo' };
+        return { id: Date.now() + index, text: note, status: 'todo', pinned: false };
+    }
+    if (note.pinned === undefined) {
+        note.pinned = false;
     }
     return note;
 });
@@ -44,7 +47,8 @@ function addNote() {
     let newNote = {
         id: Date.now(),
         text: noteText,
-        status: 'todo'
+        status: 'todo',
+        pinned: false
     };
 
     notes.push(newNote);
@@ -55,10 +59,12 @@ function addNote() {
 }
 
 function displayNotes(){
+    const sortedNotes = [...notes].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+
     if (currentView === "list") {
         let container = document.getElementById("notesContainer");
         container.innerHTML = "";
-        notes.forEach((note) => {
+        sortedNotes.forEach((note) => {
             container.innerHTML += createNoteHTML(note);
         });
     } else {
@@ -70,7 +76,7 @@ function displayNotes(){
         doingContainer.innerHTML = "";
         doneContainer.innerHTML = "";
 
-        notes.forEach((note) => {
+        sortedNotes.forEach((note) => {
             let html = createNoteHTML(note);
             if (note.status === 'todo') todoContainer.innerHTML += html;
             else if (note.status === 'doing') doingContainer.innerHTML += html;
@@ -82,11 +88,21 @@ function displayNotes(){
 
 function createNoteHTML(note) {
     return `
-        <div class="note" draggable="true" ondragstart="dragStart(event, ${note.id})">
+        <div class="note ${note.pinned ? 'pinned' : ''}" draggable="true" ondragstart="dragStart(event, ${note.id})">
             ${note.text}
+            <button class="pin-btn ${note.pinned ? 'active' : ''}" onclick="togglePin(${note.id})" title="Pin to top">📌</button>
             <button class="delete-btn" onclick="deleteNote(${note.id})">X</button>
         </div>
     `;
+}
+
+function togglePin(id) {
+    let note = notes.find(n => n.id === id);
+    if (note) {
+        note.pinned = !note.pinned;
+        localStorage.setItem("notes", JSON.stringify(notes));
+        displayNotes();
+    }
 }
 
 function deleteNote(id){
