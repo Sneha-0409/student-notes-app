@@ -11,16 +11,35 @@
     <header class="app-header">
       <h1>Notes App</h1>
 
-      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
-        <span class="theme-icon theme-icon--sun" aria-hidden="true">☀️</span>
-        <span class="theme-icon theme-icon--moon" aria-hidden="true">🌙</span>
-      </button>
+    <header class="site-header">
+        <h1>Student Notes App</h1>
     </header>
 
-    <div class="input-area">
-      <textarea id="noteInput" placeholder="Write your note here..."></textarea>
-      <button onclick="addNote()">Add Note</button>
-    </div>
+    <main class="main-content">
+        <aside class="sidebar">
+            <nav>
+                <ul>
+                    <li><a href="#">All Notes</a></li>
+                    <li><a href="#">Favorites</a></li>
+                    <li><a href="#">Archived</a></li>
+                    <li><a href="#">Settings</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="container">
+            <div class="input-area">
+                <textarea id="noteInput" placeholder="Write your note here..."></textarea>
+                <button onclick="addNote()">Add Note</button>
+            </div>
+
+            <div id="notesContainer"></div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <p>© 2026 Student Notes App. All rights reserved.</p>
+    </footer>
 
     <div id="notesContainer"></div>
   </div>

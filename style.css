@@ -61,8 +61,9 @@ body{
     background:var(--bg-color);
     color:var(--text-color);
     display:flex;
-    justify-content:center;
-    padding:50px;
+    flex-direction:column;
+    align-items:center;
+    padding:50px 20px;
 }
 
 .container{
@@ -202,28 +203,129 @@ button:focus-visible{
     width:auto;
     padding:5px 10px;
     cursor:pointer;
+}
 
+/* Header styles */
+.site-header{
+    background:#007bff;
+    color:white;
+    padding:18px 20px;
+    border-radius:10px;
+    margin-bottom:16px;
+    text-align:center;
+    width:680px;
+    box-shadow:0px 2px 8px rgba(0,0,0,0.08);
+}
+.site-header h1{
+    margin:0;
+    font-size:18px;
+    font-weight:700;
+}
+
+/* Footer styles */
+.site-footer{
+    width:680px;
+    background:white;
+    color:#666;
+    padding:12px 20px;
+    border-radius:10px;
+    margin-top:18px;
+    text-align:center;
+    box-shadow:0px 2px 8px rgba(0,0,0,0.06);
+    font-size:14px;
+}
+
+/* Main layout with sidebar */
+.main-content{
+    display:flex;
+    gap:20px;
+    width:680px;
+    align-items:flex-start;
+}
+
+.sidebar{
+    width:160px;
+    background:white;
+    padding:12px 14px;
+    border-radius:10px;
+    box-shadow:0px 2px 8px rgba(0,0,0,0.06);
+}
+
+.sidebar nav ul{
+    list-style:none;
+}
+
+.sidebar nav ul li{
+    margin:8px 0;
+}
+
+.sidebar nav ul li a{
+    color:#007bff;
+    text-decoration:none;
+    font-weight:600;
+}
+
+/* Small UI enhancements */
+:root{
+    --content-width:680px;
+    --brand:#007bff;
+}
+
+.container{
+    width:var(--content-width);
+    transition:transform 150ms ease, box-shadow 150ms ease;
+}
+
+button{
+    box-shadow:0 2px 0 rgba(0,0,0,0.08);
+    transition:transform 120ms ease, background 120ms ease;
+}
+
+button:active{
+    transform:translateY(1px) scale(0.998);
+}
+
+.note{
+    transition:transform 160ms ease, box-shadow 160ms ease;
+}
+
+.note:hover{
+    transform:translateY(-4px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+.sidebar nav ul li a:hover{
+    background:rgba(0,123,255,0.06);
+    padding:6px 8px;
     border-radius:6px;
-
-    transition: background-color 0.3s ease,
-                color 0.3s ease,
-                transform 0.1s ease;
+    display:inline-block;
 }
 
-.delete-btn:hover{
-    background:var(--danger-bg-hover);
+.sidebar nav ul li a.active{
+    background:var(--brand);
+    color:white;
+    padding:6px 8px;
+    border-radius:6px;
 }
 
-.delete-btn:focus-visible{
-    outline:3px solid color-mix(in srgb, var(--danger-bg) 60%, transparent);
-    outline-offset:2px;
-}
+/* Responsive: stack sidebar on small screens */
+@media (max-width:760px){
+    .main-content, .site-header, .site-footer{
+        width:100%;
+        max-width:680px;
+        padding:0 10px;
+    }
 
-/* =========================
-   Responsive
-   ========================= */
-@media (max-width: 520px){
-    body{ padding:20px; }
-    .container{ width:100%; }
-}
+    .main-content{
+        flex-direction:column;
+        gap:12px;
+    }
 
+    .sidebar{
+        width:100%;
+    }
+
+    .container{
+        width:100%;
+    }
+}
