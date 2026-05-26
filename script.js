@@ -85,7 +85,14 @@ function displayNotes(){
 
     notes.forEach((note,index)=>{
         if (!!note.archived !== showArchived) return;
-        if (searchQuery && !note.title.toLowerCase().includes(searchQuery) && !note.text.toLowerCase().includes(searchQuery)) return;
+        if (searchQuery) {
+            const matches = 
+                (note.title || "").toLowerCase().includes(searchQuery) ||
+                (note.text || "").toLowerCase().includes(searchQuery) ||
+                (note.tags || "").toLowerCase().includes(searchQuery) ||
+                (note.subject || "").toLowerCase().includes(searchQuery);
+            if (!matches) return;
+        }
 
         const tagsHtml = note.tags ? note.tags.split(',').map(t => `<span class="note-tag">#${t.trim()}</span>`).join('') : '';
         
