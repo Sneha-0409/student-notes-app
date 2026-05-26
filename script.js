@@ -2,12 +2,31 @@ let notes = (JSON.parse(localStorage.getItem("notes")) || []).map(n =>
     typeof n === 'string' ? { text: n, date: "Created: " + new Date().toLocaleString() } : n
 );
 
+// Data Migration
+notes = notes.map((note, index) => {
+    if (typeof note === "string") {
+        return { id: Date.now() + index, text: note, status: 'todo', pinned: false };
+    }
+    if (note.pinned === undefined) {
+        note.pinned = false;
+    }
+    return note;
+});
+localStorage.setItem("notes", JSON.stringify(notes));
 let currentView = "list";
 const THEME_KEY = "theme";
 const AUTO_SAVE_KEY = "draft";
 const AUTO_SAVE_DELAY = 2000;
 const TAGS_KEY = "allTags";
 
+let currentView = "list"; // default view
+
+displayNotes();
+initTheme();
+
+// Auto-save configuration
+const AUTO_SAVE_KEY = 'draft';
+const AUTO_SAVE_DELAY = 2000; // ms of inactivity before saving
 let autoSaveTimer = null;
 let searchQuery = "";
 let filterTags = [];
@@ -70,6 +89,25 @@ normalizeNotes();
 displayNotes();
 initTheme();
 
+function toggleView() {
+    currentView = currentView === "list" ? "board" : "list";
+    let btn = document.getElementById("toggleViewBtn");
+    btn.innerText = currentView === "list" ? "Switch to Board View" : "Switch to List View";
+    
+    let listContainer = document.getElementById("notesContainer");
+    let boardContainer = document.getElementById("kanbanBoard");
+
+    if (currentView === "list") {
+        listContainer.classList.remove("hidden");
+        boardContainer.classList.add("hidden");
+    } else {
+        listContainer.classList.add("hidden");
+        boardContainer.classList.remove("hidden");
+    }
+    
+    displayNotes();
+}
+
 function addNote() {
     let title = document.getElementById("noteTitle").value.trim();
     let noteText = document.getElementById("noteInput").value.trim();
@@ -86,6 +124,20 @@ function addNote() {
         return;
     }
 
+    let newNote = {
+        id: Date.now(),
+        text: noteText,
+        status: 'todo',
+    if (notes.some(n => n.text === noteText)) {
+
+
+    if (notes.includes(noteText)) {
+
+        alert("This note already exists!");
+        return;
+    }
+
+    notes.push({ text: noteText, date: "Created: " + new Date().toLocaleString() });
     let dueDate = document.getElementById('noteDueDate')?.value || '';
 
     const newNote = {
@@ -109,8 +161,10 @@ function addNote() {
     };
 
     notes.unshift(newNote);
+    notes.push(newNote);
 
     localStorage.setItem("notes", JSON.stringify(notes));
+    input.value = "";
 
     document.getElementById("noteTitle").value = "";
     document.getElementById("noteInput").value = "";
@@ -150,6 +204,8 @@ function displayNotes() {
     }
 }
 
+function displayNotes(){
+    const sortedNotes = [...notes].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
     let container = document.getElementById("notesContainer");
     let pinnedContainer = document.getElementById("pinnedContainer");
     let favoritesContainer = document.getElementById("favoritesContainer");
@@ -358,6 +414,45 @@ function renderKanban() {
 
 function deleteNote(id) {
     notes = notes.filter(n => String(n.id) !== String(id));
+    if (currentView === "list") {
+        let container = document.getElementById("notesContainer");
+        container.innerHTML = "";
+        sortedNotes.forEach((note) => {
+            container.innerHTML += createNoteHTML(note);
+        });
+    } else {
+        let todoContainer = document.querySelector("#todo .kanban-content");
+        let doingContainer = document.querySelector("#doing .kanban-content");
+        let doneContainer = document.querySelector("#done .kanban-content");
+        
+        todoContainer.innerHTML = "";
+        doingContainer.innerHTML = "";
+        doneContainer.innerHTML = "";
+
+        sortedNotes.forEach((note) => {
+            let html = createNoteHTML(note);
+            if (note.status === 'todo') todoContainer.innerHTML += html;
+            else if (note.status === 'doing') doingContainer.innerHTML += html;
+            else if (note.status === 'done') doneContainer.innerHTML += html;
+            else todoContainer.innerHTML += html; // fallback
+        });
+    }
+}
+
+function createNoteHTML(note) {
+    return `
+        <div class="note ${note.pinned ? 'pinned' : ''}" draggable="true" ondragstart="dragStart(event, ${note.id})">
+            ${note.text}
+            <button class="pin-btn ${note.pinned ? 'active' : ''}" onclick="togglePin(${note.id})" title="Pin to top">📌</button>
+            <button class="delete-btn" onclick="deleteNote(${note.id})">X</button>
+        </div>
+    `;
+}
+
+function togglePin(id) {
+    let note = notes.find(n => n.id === id);
+    if (note) {
+        note.pinned = !note.pinned;
 function editNote(index){
     let newNote = prompt("Edit your note:", notes[index].text);
     if(newNote !== null && newNote.trim() !== ""){
@@ -468,7 +563,55 @@ function importNotes(event) {
         } catch (error) {
             alert("Error parsing backup file. Please ensure it is a valid, uncorrupted .json file.");
         }
+function deleteNote(id){
+    notes = notes.filter(n => n.id !== id);
+    localStorage.setItem("notes", JSON.stringify(notes));
+    displayNotes();
+}
+
+// Drag and Drop Logic
+function dragStart(event, id) {
+    event.dataTransfer.setData("text/plain", id);
+    // Use timeout to hide the element while dragging for better visual
+    setTimeout(() => {
+        event.target.classList.add("dragging");
+    }, 0);
+}
+
+document.addEventListener("dragend", (event) => {
+    if (event.target.classList.contains("note")) {
+        event.target.classList.remove("dragging");
+    }
+});
+
+function allowDrop(event) {
+    event.preventDefault();
+    let column = event.target.closest('.kanban-column');
+    if (column) {
+        column.classList.add("drag-over");
+    }
+}
+
+function dragLeave(event) {
+    let column = event.target.closest('.kanban-column');
+    if (column) {
+        column.classList.remove("drag-over");
+    }
+}
+
+function drop(event) {
+    event.preventDefault();
+    let column = event.target.closest('.kanban-column');
+    if (column) {
+        column.classList.remove("drag-over");
+        let newStatus = column.getAttribute('data-status');
+        let noteId = parseInt(event.dataTransfer.getData("text/plain"));
         
+        let note = notes.find(n => n.id === noteId);
+        if (note) {
+            let oldStatus = note.status;
+            note.status = newStatus;
+            localStorage.setItem("notes", JSON.stringify(notes));
         // Reset the input value so the same file can be re-uploaded if modified
         event.target.value = '';
     };
@@ -505,6 +648,14 @@ function refreshFilters(){
 
     displayNotes();
 }
+    if(filterTagsInput){
+        filterTagsInput.addEventListener('input', (e)=>{
+            const txt = e.target.value.trim();
+            filterTags = txt ? txt.split(',').map(t=>t.trim()).filter(Boolean) : [];
+            displayNotes();
+
+            if (oldStatus !== 'done' && newStatus === 'done') {
+                showToast("🎉 Congratulations on completing a task!");
     refreshFilters();
     // Restore any unsaved draft if present
     restoreDraft();
@@ -714,6 +865,32 @@ function renderSuggestedTags() {
         tags.map(
             t => `<span class="tag">${escapeHtml(t)}</span>`
         ).join(" ");
+        }
+    }
+}
+
+function showToast(message) {
+    let container = document.getElementById("toastContainer");
+    if (!container) return;
+
+    let toast = document.createElement("div");
+    toast.className = "toast";
+    toast.innerText = message;
+    
+    container.appendChild(toast);
+    
+    // Trigger animation
+    setTimeout(() => {
+        toast.classList.add("show");
+    }, 10);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 3000);
 }
 
 function initTheme() {
