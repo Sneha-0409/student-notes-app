@@ -362,3 +362,19 @@ function updateSidebar() {
         attSubjectSelect.innerHTML = '<option value="">Subject</option>' + subjects.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
     }
 }
+
+/**
+ * Toggles a predefined tag in the tags input field
+ */
+function addQuickTag(tag) {
+    const tagsInput = document.getElementById("noteTags");
+    let currentTags = tagsInput.value.split(',').map(t => t.trim()).filter(t => t !== "");
+    
+    const tagIndex = currentTags.indexOf(tag);
+    if (tagIndex === -1) {
+        currentTags.push(tag);
+    } else {
+        currentTags.splice(tagIndex, 1);
+    }
+    tagsInput.value = currentTags.join(', ');
+}
