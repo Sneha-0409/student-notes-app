@@ -263,8 +263,28 @@ button:focus-visible{
    ========================= */
 .sort-controls {
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    gap: 15px;
     margin-bottom: 15px;
+}
+
+.search-section input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
+.archive-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    cursor: pointer;
+    color: var(--muted-text-color);
 }
 
 #sortOrder {
@@ -306,6 +326,11 @@ button:focus-visible{
     box-shadow: 0 2px 4px var(--shadow-color-soft);
     word-wrap: break-word;
     transition: transform 0.2s ease;
+}
+
+.note.archived {
+    opacity: 0.8;
+    background: var(--surface-color);
 }
 
 .note:hover {

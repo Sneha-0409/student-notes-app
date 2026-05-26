@@ -32,6 +32,7 @@ function addNote() {
         tags: tagsInput.value,
         subject: subjectInput.value,
         folder: folderInput.value,
+        archived: false,
         date: "Created: " + new Date().toLocaleString() 
     });
 
@@ -50,6 +51,9 @@ function addNote() {
 
 function displayNotes(){
     let container = document.getElementById("notesContainer");
+    const showArchived = document.getElementById("showArchived")?.checked || false;
+    const searchQuery = document.getElementById("searchInput")?.value.toLowerCase() || "";
+
     container.innerHTML = "";
 
     if (notes.length === 0) {
@@ -62,11 +66,17 @@ function displayNotes(){
     }
 
     notes.forEach((note,index)=>{
+        if (!!note.archived !== showArchived) return;
+        if (searchQuery && !note.title.toLowerCase().includes(searchQuery) && !note.text.toLowerCase().includes(searchQuery)) return;
+
         const tagsHtml = note.tags ? note.tags.split(',').map(t => `<span class="note-tag">#${t.trim()}</span>`).join('') : '';
         
         container.innerHTML += `
-            <div class="note">
+            <div class="note ${note.archived ? 'archived' : ''}">
                 <div class="note-actions">
+                    <button class="icon-btn archive-btn" onclick="toggleArchive(${index})" title="${note.archived ? 'Restore' : 'Archive'}">
+                        ${note.archived ? '📥' : '📦'}
+                    </button>
                     <button class="icon-btn edit-btn" onclick="editNote(${index})" aria-label="Edit">✎</button>
                     <button class="icon-btn delete-btn" onclick="deleteNote(${index})" aria-label="Delete">✕</button>
                 </div>
@@ -84,7 +94,7 @@ function displayNotes(){
 function editNote(index){
     const note = notes[index];
     const newText = prompt("Edit your note content:", note.text);
-    if(newNote !== null && newNote.trim() !== ""){
+    if(newText !== null && newText.trim() !== ""){
         notes[index] = { 
             ...note, 
             text: newText.trim(), 
@@ -93,6 +103,13 @@ function editNote(index){
         localStorage.setItem("notes", JSON.stringify(notes));
         displayNotes();
     }
+}
+
+function toggleArchive(index) {
+    notes[index].archived = !notes[index].archived;
+    notes[index].date = (notes[index].archived ? "Archived: " : "Restored: ") + new Date().toLocaleString();
+    localStorage.setItem("notes", JSON.stringify(notes));
+    displayNotes();
 }
 
 function sortNotes() {
@@ -175,6 +192,7 @@ function escapeHtml(str){
 function setupInputListeners() {
     // Map input IDs to their respective actions
     const inputs = [
+        { id: "searchInput", action: displayNotes },
         { id: "noteTitle", action: addNote },
         { id: "noteInput", action: addNote, isTextArea: true },
         { id: "noteTags", action: addNote },
@@ -200,6 +218,8 @@ function setupInputListeners() {
     // Also attach clicks to the sidebar buttons that were missing logic
     document.getElementById("addFolderBtn")?.addEventListener("click", addFolder);
     document.getElementById("addSubjectBtn")?.addEventListener("click", addSubject);
+
+    document.getElementById("searchInput")?.addEventListener("input", displayNotes);
 }
 
 function addFolder() {
