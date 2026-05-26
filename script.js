@@ -141,6 +141,7 @@ function normalizeNotes(){
             id: n.id || (Date.now() + Math.floor(Math.random()*1000)),
             title: n.title || '',
             content: n.content || '',
+            sections: Array.isArray(n.sections) ? n.sections : [],
             tags: Array.isArray(n.tags) ? n.tags : (n.tags ? String(n.tags).split(',').map(s=>s.trim()).filter(Boolean) : []),
             subject: n.subject || '',
             pinned: !!n.pinned,
@@ -185,6 +186,7 @@ function addNote() {
         tags: tagsText ? tagsText.split(',').map(t=>t.trim()).filter(Boolean) : [],
         subject: subjectText || '',
         folderId: folderId || '',
+        sections: gatherSectionsFromEditor(),
         pinned: false
     };
 
@@ -305,9 +307,25 @@ function displayNotes(){
         tmp.innerHTML = safeHtml;
         if(q) highlightInElement(tmp, q);
         const contentHtml = `<div class="note-content">${tmp.innerHTML}</div>`;
-        const subjectHtml = note.subject ? `<div class="note-subject">Subject: ${escapeHtml(note.subject)}</div>` : '';
-            const subjectColor = (note.subject && subjects[note.subject]) ? sanitizeColor(subjects[note.subject]) : '';
-            const subjectHtml = note.subject ? `<div class="note-subject"><span class="subject-chip" style="background:${subjectColor};">${escapeHtml(note.subject)}</span></div>` : '';
+        const subjectColor = (note.subject && subjects[note.subject]) ? sanitizeColor(subjects[note.subject]) : '';
+        const subjectHtml = note.subject ? `<div class="note-subject"><span class="subject-chip" style="background:${subjectColor};">${escapeHtml(note.subject)}</span></div>` : '';
+        // render sections
+        const sectionsHtml = (note.sections || []).map(s=>{
+            const t = String(s.type || '').toLowerCase();
+            const c = s.content || '';
+            if(t === 'code'){
+                return `<div class="note-section"><div class="section-type">Code / Example</div><pre class="note-code">${escapeHtml(c)}</pre></div>`;
+            }
+            if(t === 'formula'){
+                return `<div class="note-section"><div class="section-type">Formula / Reference</div><pre class="note-formula">${escapeHtml(c)}</pre></div>`;
+            }
+            const titleMap = { lecture: 'Lecture', important: 'Important', summary: 'Summary' };
+            const heading = titleMap[t] || escapeHtml(s.type || 'Section');
+            let raw = '';
+            try{ raw = window.marked ? marked.parse(c||'') : escapeHtml(c); }catch(e){ raw = escapeHtml(c); }
+            const safe = (window.DOMPurify && DOMPurify.sanitize) ? DOMPurify.sanitize(raw) : raw;
+            return `<div class="note-section"><div class="section-type">${heading}</div><div class="section-content">${safe}</div></div>`;
+        }).join('');
         const tagsHtml = (note.tags || []).length ? `<div class="note-tags">${note.tags.map(t=>`<button type="button" class="tag" onclick="applyTagFilter(${JSON.stringify(t)})">${escapeHtml(t)}</button>`).join('')}</div>` : '';
 
         // Favorite & Pin buttons
@@ -322,6 +340,7 @@ function displayNotes(){
                 ${contentHtml}
                 ${subjectHtml}
                 ${tagsHtml}
+                ${sectionsHtml}
                 <button class="delete-btn" onclick="deleteNote('${note.id}')" aria-label="Delete note">X</button>
 
             </div>
@@ -622,6 +641,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         newSubjectInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); addSubjectBtn.click(); } });
     }
+    // Wire sections add/remove UI
+    const addSectionBtn = document.getElementById('addSectionBtn');
+    const newSectionType = document.getElementById('newSectionType');
+    if(addSectionBtn && newSectionType){
+        addSectionBtn.addEventListener('click', ()=>{
+            const t = (newSectionType.value||'lecture');
+            addSectionBlock(t, '');
+        });
+    }
     // Wire folder add button
     const newFolderInput = document.getElementById('newFolderName');
     const addFolderBtn = document.getElementById('addFolderBtn');
@@ -870,6 +898,47 @@ function populateFilterSubject(){
     select.innerHTML = '<option value="">All subjects</option>' + known.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
     select.value = current || '';
 }
+
+// Section editor helpers
+function addSectionBlock(type, content){
+    const list = document.getElementById('sectionsList');
+    if(!list) return;
+    const id = 'sec_' + (Date.now() + Math.floor(Math.random()*1000));
+    const div = document.createElement('div');
+    div.className = 'section-block';
+    div.id = id;
+    div.innerHTML = `
+        <div class="section-header">
+            <div class="section-type">${escapeHtml(type)}</div>
+            <div><button class="section-remove" type="button">Remove</button></div>
+        </div>
+        <div class="section-content">
+            <textarea placeholder="Section content">${escapeHtml(content||'')}</textarea>
+        </div>
+    `;
+    list.appendChild(div);
+    const btn = div.querySelector('.section-remove');
+    if(btn) btn.addEventListener('click', ()=>{ div.remove(); });
+}
+
+function gatherSectionsFromEditor(){
+    const list = document.getElementById('sectionsList');
+    if(!list) return [];
+    const out = [];
+    Array.from(list.children).forEach(block=>{
+        const type = block.querySelector('.section-type')?.textContent || 'section';
+        const content = block.querySelector('textarea')?.value || '';
+        out.push({ type: type.trim().toLowerCase(), content });
+    });
+    return out;
+}
+
+function renderSectionsInEditor(sections){
+    const list = document.getElementById('sectionsList');
+    if(!list) return;
+    list.innerHTML = '';
+    (sections || []).forEach(s=> addSectionBlock(s.type || 'section', s.content || ''));
+}
 function recordRecent(note){
     if(!note) return;
     try{
@@ -932,6 +1001,8 @@ function openNote(id){
     if(inputEl) inputEl.focus();
     // record that user opened this note
     try{ recordRecent(note); }catch(e){}
+    // populate sections editor
+    try{ renderSectionsInEditor(note.sections || []); }catch(e){}
 }
 
 // Render recent on load

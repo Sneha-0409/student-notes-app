@@ -560,6 +560,14 @@ button:focus-visible{
 .subject-list{ list-style:none; padding-left:0; margin:6px 0 }
 .subject-list .subject-row{ display:flex; align-items:center; gap:8px }
 
+/* Note sections */
+.section-block{ background: color-mix(in srgb, var(--surface-2-color) 90%, transparent); padding:8px; border-radius:6px; margin-top:8px; border:1px solid var(--border-color) }
+.section-header{ display:flex; justify-content:space-between; align-items:center; gap:8px }
+.section-type{ font-weight:700; font-size:13px; color:var(--muted-text-color) }
+.section-content{ margin-top:8px }
+.section-content textarea{ height:80px; }
+.section-remove{ background:transparent; border:1px solid var(--border-color); padding:4px 6px; border-radius:6px; cursor:pointer }
+
 
 /* Recent history panel (minimal) */
 .recent-section{ margin-top:16px }

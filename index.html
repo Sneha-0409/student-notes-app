@@ -39,6 +39,21 @@
             <option value="">No folder</option>
           </select>
         </div>
+        <!-- Sections: minimal structured blocks inside a note -->
+        <div id="sectionsArea" style="margin-top:10px">
+          <label style="display:block; margin-bottom:6px; color:var(--muted-text-color)">Sections</label>
+          <div id="sectionsList"></div>
+          <div style="display:flex; gap:8px; margin-top:8px; align-items:center">
+            <select id="newSectionType">
+              <option value="lecture">Lecture</option>
+              <option value="important">Important</option>
+              <option value="formula">Formula / Reference</option>
+              <option value="summary">Summary</option>
+              <option value="code">Code / Example</option>
+            </select>
+            <button id="addSectionBtn">Add Section</button>
+          </div>
+        </div>
         <div class="input-row actions">
           <label><input type="checkbox" id="livePreviewToggle" /> Live preview</label>
           <div style="display:flex; align-items:center; gap:10px">
