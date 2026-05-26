@@ -568,6 +568,13 @@ button:focus-visible{
 .section-content textarea{ height:80px; }
 .section-remove{ background:transparent; border:1px solid var(--border-color); padding:4px 6px; border-radius:6px; cursor:pointer }
 
+/* Attendance panel */
+.attendance-panel{ margin-top:8px; padding:8px; border-radius:6px; border:1px dashed var(--border-color); background: color-mix(in srgb, var(--surface-color) 96%, transparent) }
+.attendance-summary{ margin-top:6px; font-size:13px }
+.attendance-row{ display:flex; justify-content:space-between; gap:8px; padding:6px 4px; border-radius:6px }
+.low-attendance{ color: #b91c1c; font-weight:700 }
+
+
 
 /* Recent history panel (minimal) */
 .recent-section{ margin-top:16px }

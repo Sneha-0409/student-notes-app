@@ -75,6 +75,10 @@ let folders = JSON.parse(localStorage.getItem('folders')) || [];
 let currentFolder = null; // currently selected folder id (string)
 // Subjects mapping: name -> color (hex)
 let subjects = JSON.parse(localStorage.getItem('subjects')) || {};
+// Attendance mapping: subject -> [{date:'YYYY-MM-DD', status:'present'|'absent'}]
+let attendance = JSON.parse(localStorage.getItem('attendance')) || {};
+
+function saveAttendance(){ try{ localStorage.setItem('attendance', JSON.stringify(attendance)); }catch(e){} }
 
 const TAGS_KEY = 'allTags';
 
@@ -567,6 +571,8 @@ function refreshFilters(){
     renderFolders();
     // render subjects panel and ensure subject list affects filter
     renderSubjects();
+    populateFilterSubject();
+    renderAttendancePanel();
 }
 
 // Search and filter input wiring
@@ -664,6 +670,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // Render folders and populate selects on load
     try{ renderFolders(); populateFolderSelect(); }catch(e){}
+    // Attendance wiring
+    const attendanceDate = document.getElementById('attendanceDate');
+    const markPresentBtn = document.getElementById('markPresentBtn');
+    const markAbsentBtn = document.getElementById('markAbsentBtn');
+    const attendanceSubject = document.getElementById('attendanceSubject');
+    if(attendanceDate) attendanceDate.value = formatYMD(new Date());
+    if(markPresentBtn){
+        markPresentBtn.addEventListener('click', ()=>{
+            const subj = attendanceSubject?.value || '';
+            if(!subj){ alert('Select a subject first'); return; }
+            const ok = addAttendanceRecord(subj, attendanceDate?.value, 'present');
+            if(ok){ renderAttendancePanel(); alert('Recorded present for '+subj); }
+        });
+    }
+    if(markAbsentBtn){
+        markAbsentBtn.addEventListener('click', ()=>{
+            const subj = attendanceSubject?.value || '';
+            if(!subj){ alert('Select a subject first'); return; }
+            const ok = addAttendanceRecord(subj, attendanceDate?.value, 'absent');
+            if(ok){ renderAttendancePanel(); alert('Recorded absent for '+subj); }
+        });
+    }
+    // initial attendance panel render
+    try{ renderAttendancePanel(); }catch(e){}
     // Live preview handling
     if(noteInput && livePreview && livePreviewToggle){
         const updatePreview = () => {
@@ -897,6 +927,61 @@ function populateFilterSubject(){
     const current = select.value;
     select.innerHTML = '<option value="">All subjects</option>' + known.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
     select.value = current || '';
+}
+
+// ---------------------
+// Attendance helpers
+// ---------------------
+function formatYMD(d){
+    if(!d) return '';
+    const dt = new Date(d);
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth()+1).padStart(2,'0');
+    const day = String(dt.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+}
+
+function addAttendanceRecord(subject, dateStr, status){
+    if(!subject) return false;
+    const d = formatYMD(dateStr || new Date());
+    attendance[subject] = attendance[subject] || [];
+    // replace record for date if exists
+    const idx = attendance[subject].findIndex(r=> r.date === d);
+    if(idx !== -1) attendance[subject][idx].status = status;
+    else attendance[subject].push({ date: d, status });
+    saveAttendance();
+    return true;
+}
+
+function getAttendance(subject){
+    return (attendance[subject] || []).slice().sort((a,b)=> a.date.localeCompare(b.date));
+}
+
+function attendancePercent(subject){
+    const recs = attendance[subject] || [];
+    if(!recs.length) return null;
+    const present = recs.filter(r=> r.status === 'present').length;
+    return Math.round((present / recs.length) * 100);
+}
+
+function renderAttendancePanel(){
+    const sel = document.getElementById('attendanceSubject');
+    if(sel){
+        const keys = Object.keys(subjects || {});
+        const opts = ['<option value="">Select subject</option>'].concat(keys.map(k=>`<option value="${escapeHtml(k)}">${escapeHtml(k)}</option>`));
+        sel.innerHTML = opts.join('');
+    }
+    // summary area
+    const sum = document.getElementById('attendanceSummary');
+    if(!sum) return;
+    const keys = Object.keys(subjects || {});
+    if(!keys.length){ sum.innerHTML = '<div class="muted">No subjects to show attendance</div>'; return; }
+    sum.innerHTML = keys.map(k=>{
+        const pct = attendancePercent(k);
+        const pctText = pct === null ? 'No records' : pct + '%';
+        const warn = (pct !== null && pct < 75) ? ' low-attendance' : '';
+        return `<div class="attendance-row"><div>${escapeHtml(k)}</div><div class="attendance-pct${warn}">${pctText}</div></div>`;
+    }).join('');
 }
 
 // Section editor helpers

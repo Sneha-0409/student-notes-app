@@ -28,6 +28,21 @@
           <input id="newSubjectColor" type="color" value="#ffd966" title="Pick color" />
           <button id="addSubjectBtn" type="button">Add</button>
         </div>
+        <hr style="margin:12px 0" />
+        <h3>Attendance</h3>
+        <div id="attendancePanel" class="attendance-panel">
+          <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px">
+            <select id="attendanceSubject" style="flex:1">
+              <option value="">Select subject</option>
+            </select>
+            <input id="attendanceDate" type="date" />
+          </div>
+          <div style="display:flex; gap:8px; margin-bottom:8px">
+            <button id="markPresentBtn" type="button">Present</button>
+            <button id="markAbsentBtn" type="button">Absent</button>
+          </div>
+          <div id="attendanceSummary" class="attendance-summary"></div>
+        </div>
       </aside>
       <div class="input-area">
         <input id="noteTitle" placeholder="Title (optional)" />
