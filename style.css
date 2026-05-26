@@ -1264,6 +1264,27 @@ input:focus, select:focus, textarea:focus{
 
 .editor-toolbar .btn.active{ background: linear-gradient(90deg,var(--accent-1),var(--accent-2)); color:white; border-color:transparent }
 
+/* Dashboard */
+.dashboard{ margin-bottom:18px; display:flex; flex-direction:column; gap:14px }
+.dashboard-grid{ display:grid; grid-template-columns: repeat(4,1fr); gap:12px }
+.stat-card{ background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,255,0.7)); border-radius:12px; padding:14px; box-shadow: var(--shadow-sm); display:flex; flex-direction:column; gap:6px }
+.stat-card .label{ font-size:0.85rem; color:var(--muted-text-color) }
+.stat-card .value{ font-size:1.25rem; font-weight:700; color:var(--accent-1) }
+.dashboard-list{ display:flex; gap:12px }
+.recent-notes{ flex:1; background:var(--card-surface); padding:12px; border-radius:10px; min-height:120px }
+.recent-notes h4{ margin:0 0 8px 0 }
+.recent-note-item{ padding:8px; border-radius:8px; border:1px solid rgba(0,0,0,0.04); margin-bottom:8px; background:linear-gradient(180deg, #fff, #fbfdff) }
+.dashboard-widgets{ width:320px; display:flex; flex-direction:column; gap:12px }
+
+@media (max-width:1000px){
+    .dashboard-grid{ grid-template-columns: repeat(2,1fr); }
+    .dashboard-widgets{ width:100%; }
+}
+@media (max-width:600px){
+    .dashboard-grid{ grid-template-columns: 1fr; }
+    .dashboard{ gap:10px }
+}
+
 /* Breadcrumb */
 .breadcrumb{ display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:8px; background: color-mix(in srgb, var(--surface-color) 92%, transparent); border:1px solid rgba(0,0,0,0.03); margin:12px 0 }
 .breadcrumb .crumb{ color:var(--muted-text-color); text-decoration:none; font-size:0.95rem }

@@ -22,6 +22,43 @@
     </header>
 
     <main class="main-content">
+      <!-- Dashboard overview -->
+      <section id="dashboard" class="dashboard">
+        <div class="dashboard-grid" role="region" aria-label="Dashboard stats">
+          <div class="stat-card">
+            <div class="label">Total Notes</div>
+            <div id="statTotalNotes" class="value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Pinned</div>
+            <div id="statPinned" class="value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Due Soon</div>
+            <div id="statDueSoon" class="value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Recent Activity</div>
+            <div id="statRecentCount" class="value">0</div>
+          </div>
+        </div>
+        <div class="dashboard-list">
+          <div class="recent-notes">
+            <h4>Recent Notes</h4>
+            <div id="recentNotesList"></div>
+          </div>
+          <div class="dashboard-widgets">
+            <div class="stat-card">
+              <div class="label">Attendance (summary)</div>
+              <div id="statAttendance" class="value">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Upcoming Deadlines</div>
+              <div id="statDeadlines" class="value">—</div>
+            </div>
+          </div>
+        </div>
+      </section>
       <aside class="sidebar">
         <div class="sidebar-mini" aria-hidden="true">
           <button class="mini-btn" id="miniHome" title="Home" aria-label="Home">🏠</button>
@@ -588,6 +625,57 @@
         const savedId = localStorage.getItem('current.folder');
         if(savedId){ const target = tree.querySelector(`[data-id="${savedId}"]`); if(target){ target.click(); renderCrumbs(buildPathFromElement(target)); } }
         const sel = tree.querySelector('.folder-item.selected'); if(!savedId && sel) renderCrumbs(buildPathFromElement(sel));
+      })();
+    </script>
+    <script>
+      // Minimal dashboard renderer: reads localStorage and populates stats
+      (function(){
+        function withinDays(dateStr, days){
+          if(!dateStr) return false;
+          const d = new Date(dateStr); if(isNaN(d)) return false;
+          const now = new Date(); const diff = (d - now) / (1000*60*60*24);
+          return diff >=0 && diff <= days;
+        }
+
+        function renderDashboard(){
+          try{
+            const notes = JSON.parse(localStorage.getItem('notes')||'[]');
+            const assignments = JSON.parse(localStorage.getItem('assignments')||'[]');
+            const attendance = JSON.parse(localStorage.getItem('attendance')||'[]');
+
+            const totalNotes = Array.isArray(notes) ? notes.length : 0;
+            const pinned = Array.isArray(notes) ? notes.filter(n=>n.pinned).length : 0;
+            const dueSoon = Array.isArray(assignments) ? assignments.filter(a=> withinDays(a.due, 7)).length : 0;
+            const recentCount = Array.isArray(notes) ? notes.slice().sort((a,b)=> (b.id||0)-(a.id||0)).slice(0,5).length : 0;
+
+            document.getElementById('statTotalNotes').textContent = totalNotes;
+            document.getElementById('statPinned').textContent = pinned;
+            document.getElementById('statDueSoon').textContent = dueSoon;
+            document.getElementById('statRecentCount').textContent = recentCount;
+
+            // recent notes list
+            const recentList = document.getElementById('recentNotesList'); if(recentList){ recentList.innerHTML='';
+              (notes.slice().sort((a,b)=> (b.id||0)-(a.id||0)).slice(0,5)).forEach(n=>{
+                const div = document.createElement('div'); div.className='recent-note-item';
+                div.innerHTML = `<strong>${(n.title||'Untitled')}</strong><div style="font-size:12px;color:var(--muted-text-color)">${(n.content||'').slice(0,120)}</div>`;
+                recentList.appendChild(div);
+              }); }
+
+            // attendance summary (simple percent present)
+            if(Array.isArray(attendance) && attendance.length){ const present = attendance.filter(a=>a.status==='present').length; const pct = Math.round((present/attendance.length)*100); document.getElementById('statAttendance').textContent = pct + '%'; }
+            else document.getElementById('statAttendance').textContent = '—';
+
+            // upcoming deadlines list count
+            if(Array.isArray(assignments) && assignments.length){ const soon = assignments.filter(a=> withinDays(a.due,7)).length; document.getElementById('statDeadlines').textContent = soon; } else document.getElementById('statDeadlines').textContent='0';
+          }catch(e){ console.warn('dashboard render', e); }
+        }
+
+        // re-render on load and when notes change
+        window.addEventListener('load', ()=> setTimeout(renderDashboard, 300));
+        const notesContainer = document.getElementById('notesContainer');
+        if(notesContainer){ const mo = new MutationObserver(()=> renderDashboard()); mo.observe(notesContainer, { childList:true, subtree:true }); }
+        // expose for manual refresh
+        window.renderDashboard = renderDashboard;
       })();
     </script>
     <script>
