@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Notes App</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
@@ -121,18 +124,27 @@
       </section>
     </main>
 
-    <footer class="site-footer">
-        <p>© 2026 Student Notes App. All rights reserved.</p>
-    </footer>
+        <div class="view-controls">
+            <button id="toggleViewBtn" onclick="toggleView()" class="secondary-btn">Switch to Board View</button>
+        </div>
 
-    <div class="sort-controls">
-      <select id="sortOrder" onchange="sortNotes()">
-        <option value="" selected disabled>Sort Alphabetically</option>
-        <option value="asc">A to Z</option>
-        <option value="desc">Z to A</option>
-      </select>
+        <div id="notesContainer"></div>
+
+        <div id="kanbanBoard" class="hidden">
+            <div class="kanban-column" id="todo" data-status="todo" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                <h2>To Do</h2>
+                <div class="kanban-content"></div>
+            </div>
+            <div class="kanban-column" id="doing" data-status="doing" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                <h2>Doing</h2>
+                <div class="kanban-content"></div>
+            </div>
+            <div class="kanban-column" id="done" data-status="done" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                <h2>Done</h2>
+                <div class="kanban-content"></div>
+            </div>
+        </div>
     </div>
-
     <div class="view-controls" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
         <button id="toggleViewBtn" onclick="toggleView()" class="secondary-btn" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #ccc; background: #fff; cursor: pointer;">Switch to Board View</button>
     </div>
@@ -169,6 +181,7 @@
       </section>
   </div>
 
+    <div id="toastContainer" class="toast-container"></div>
   <div id="toastContainer" class="toast-container"></div>
 
   <script src="script.js"></script>
@@ -176,6 +189,7 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
 
+<script src="script.js"></script>
 </body>
 </html>
 
