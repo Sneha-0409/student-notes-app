@@ -546,6 +546,7 @@
             tree.querySelectorAll('.folder-item.selected').forEach(n=>n.classList.remove('selected'));
             if(typeof displayNotes === 'function') displayNotes();
             bc.style.display = 'none';
+            localStorage.removeItem('current.folder');
           });
           bc.appendChild(home);
 
@@ -556,6 +557,8 @@
             bc.appendChild(a);
           });
           bc.style.display = parts.length ? 'flex' : 'none';
+          // persist last selected folder id
+          if(parts.length){ const last = parts[parts.length-1]; if(last && last.id) localStorage.setItem('current.folder', String(last.id)); }
         }
 
         tree.addEventListener('click', (e)=>{
@@ -572,8 +575,10 @@
         const mo = new MutationObserver(()=>{ const sel = tree.querySelector('.folder-item.selected'); if(sel) renderCrumbs(buildPathFromElement(sel)); });
         mo.observe(tree, { childList:true, subtree:true });
 
-        // initial state
-        const sel = tree.querySelector('.folder-item.selected'); if(sel) renderCrumbs(buildPathFromElement(sel));
+        // initial state: try to restore from localStorage, else from DOM selection
+        const savedId = localStorage.getItem('current.folder');
+        if(savedId){ const target = tree.querySelector(`[data-id="${savedId}"]`); if(target){ target.click(); renderCrumbs(buildPathFromElement(target)); } }
+        const sel = tree.querySelector('.folder-item.selected'); if(!savedId && sel) renderCrumbs(buildPathFromElement(sel));
       })();
     </script>
     <!-- Empty state markup and logic -->
