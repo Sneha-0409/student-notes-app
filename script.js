@@ -3,10 +3,13 @@ let notes = JSON.parse(localStorage.getItem("notes")) || [];
 // Data Migration
 notes = notes.map((note, index) => {
     if (typeof note === "string") {
-        return { id: Date.now() + index, text: note, status: 'todo', pinned: false };
+        return { id: Date.now() + index, text: note, status: 'todo', pinned: false, dueDate: "" };
     }
     if (note.pinned === undefined) {
         note.pinned = false;
+    }
+    if (note.dueDate === undefined) {
+        note.dueDate = "";
     }
     return note;
 });
@@ -37,7 +40,9 @@ function toggleView() {
 
 function addNote() {
     let input = document.getElementById("noteInput");
+    let dateInput = document.getElementById("dueDateInput");
     let noteText = input.value.trim();
+    let dueDate = dateInput.value;
 
     if(noteText === ""){
         alert("Please enter a note");
@@ -48,13 +53,15 @@ function addNote() {
         id: Date.now(),
         text: noteText,
         status: 'todo',
-        pinned: false
+        pinned: false,
+        dueDate: dueDate
     };
 
     notes.push(newNote);
 
     localStorage.setItem("notes", JSON.stringify(notes));
     input.value = "";
+    dateInput.value = "";
     displayNotes();
 }
 
@@ -86,10 +93,32 @@ function displayNotes(){
     }
 }
 
+function getDueDateBadgeHTML(dueDate) {
+    if (!dueDate) return "";
+    
+    let today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let due = new Date(dueDate);
+    due.setHours(0, 0, 0, 0);
+    
+    let diffTime = due - today;
+    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) {
+        return `<span class="date-badge date-badge-overdue">🔴 Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) > 1 ? 's' : ''}!</span>`;
+    } else if (diffDays === 0) {
+        return `<span class="date-badge date-badge-today">🟡 Due Today!</span>`;
+    } else {
+        return `<span class="date-badge date-badge-due">🟢 Due in ${diffDays} day${diffDays > 1 ? 's' : ''}</span>`;
+    }
+}
+
 function createNoteHTML(note) {
+    let badgeHTML = getDueDateBadgeHTML(note.dueDate);
     return `
         <div class="note ${note.pinned ? 'pinned' : ''}" draggable="true" ondragstart="dragStart(event, ${note.id})">
             ${note.text}
+            ${badgeHTML}
             <button class="pin-btn ${note.pinned ? 'active' : ''}" onclick="togglePin(${note.id})" title="Pin to top">📌</button>
             <button class="delete-btn" onclick="deleteNote(${note.id})">X</button>
         </div>

@@ -16,7 +16,10 @@
 
         <div class="input-area">
             <textarea id="noteInput" placeholder="Write your note here..."></textarea>
-            <button onclick="addNote()">Add Note</button>
+            <div class="input-actions">
+                <input type="date" id="dueDateInput" title="Set a due date">
+                <button onclick="addNote()">Add Note</button>
+            </div>
         </div>
 
         <div class="view-controls">
