@@ -153,6 +153,49 @@
       <div id="recentContainer" class="recent-container"></div>
     </section>
 
+    <!-- Mind Map feature card -->
+    <section id="mindmapSection" class="card" aria-labelledby="mindmapHeading" style="margin-top:18px;">
+      <h2 id="mindmapHeading">Mind Map (Beta)</h2>
+      <p>Add a mind map feature to help students visually organize concepts, topics, and study material.</p>
+      <ul>
+        <li><strong>Features</strong></li>
+        <li>Create connected topic nodes</li>
+        <li>Drag-and-drop node positioning</li>
+        <li>Expand/collapse branches</li>
+        <li>Color-coded topic hierarchy</li>
+        <li>Real-time editing</li>
+        <li>Export functionality</li>
+      </ul>
+      <p><strong>Benefits</strong></p>
+      <ul>
+        <li>Improved concept visualization</li>
+        <li>Better study planning</li>
+        <li>Easier topic understanding and revision</li>
+      </ul>
+      <div style="margin-top:10px; display:flex; gap:8px;">
+        <a href="mindmap.html"><button type="button">Open Mind Map</button></a>
+        <button id="createSampleMap">Create Sample Map</button>
+      </div>
+    </section>
+    <script>
+      (function(){
+        const btn = document.getElementById('createSampleMap');
+        if(!btn) return;
+        btn.addEventListener('click', ()=>{
+          const w = window.open('mindmap.html', '_blank');
+          if(!w) return alert('Popup blocked — please allow popups or open Mind Map manually.');
+          const maxAttempts = 50; let attempts = 0;
+          const iv = setInterval(()=>{
+            try{
+              if(w.createSampleMap){ w.createSampleMap(); clearInterval(iv); w.focus(); }
+            }catch(e){}
+            attempts++;
+            if(attempts>maxAttempts){ clearInterval(iv); }
+          }, 200);
+        });
+      })();
+    </script>
+
     <div id="toastContainer" class="toast-container"></div>
 
     <!-- Markdown renderer and sanitizer -->
