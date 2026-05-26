@@ -177,6 +177,34 @@
         <button id="createSampleMap">Create Sample Map</button>
       </div>
     </section>
+    <section id="glassSection" class="card" aria-labelledby="glassHeading" style="margin-top:18px;">
+      <h2 id="glassHeading">Glassmorphism UI (Preview)</h2>
+      <p>Implement a modern glassmorphism-based user interface to improve the app's visual appearance.</p>
+      <ul>
+        <li>Frosted glass effect cards</li>
+        <li>Transparent backgrounds & blur</li>
+        <li>Smooth gradients and responsive layout</li>
+        <li>Dark/light mode compatibility</li>
+      </ul>
+      <div style="margin-top:10px; display:flex; gap:8px;">
+        <button id="toggleGlass">Toggle Glass UI</button>
+        <button id="resetTheme">Reset</button>
+      </div>
+    </section>
+    <script>
+      (function(){
+        const btn = document.getElementById('toggleGlass');
+        const reset = document.getElementById('resetTheme');
+        function applyGlass(on){
+          if(on){ document.body.classList.add('glass'); localStorage.setItem('ui.glass','1'); }
+          else { document.body.classList.remove('glass'); localStorage.removeItem('ui.glass'); }
+        }
+        btn && btn.addEventListener('click', ()=> applyGlass(!document.body.classList.contains('glass')));
+        reset && reset.addEventListener('click', ()=> applyGlass(false));
+        // restore
+        if(localStorage.getItem('ui.glass')) applyGlass(true);
+      })();
+    </script>
     <script>
       (function(){
         const btn = document.getElementById('createSampleMap');
