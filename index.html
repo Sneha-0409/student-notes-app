@@ -21,6 +21,7 @@
     <main class="main-content">
       <aside class="sidebar">
         <h3>Folders</h3>
+        <nav id="breadcrumb" class="breadcrumb" aria-label="Breadcrumb" style="display:none"></nav>
         <div id="foldersTree"></div>
         <div style="margin-top:10px; display:flex; gap:8px">
           <input id="newFolderName" placeholder="New folder name" style="flex:1; padding:6px" />
@@ -514,6 +515,65 @@
 
         // initialize on load
         window.addEventListener('load', ()=>{ setTimeout(()=>{ enableNoteDrag(); enableFolderDrag(); }, 120); });
+      })();
+    </script>
+    <script>
+      // Minimal breadcrumb navigation for folder tree
+      (function(){
+        const bc = document.getElementById('breadcrumb');
+        const tree = document.getElementById('foldersTree');
+        if(!bc || !tree) return;
+
+        function buildPathFromElement(el){
+          const parts = [];
+          let cur = el;
+          while(cur && cur !== tree && cur !== document.body){
+            if(cur.classList && cur.classList.contains('folder-item')){
+              const name = (cur.querySelector('.name') && cur.querySelector('.name').textContent.trim()) || cur.dataset.name || cur.textContent.trim();
+              const id = cur.dataset.id || cur.getAttribute('data-id') || '';
+              parts.unshift({ name, id, el: cur });
+            }
+            cur = cur.parentElement;
+          }
+          return parts;
+        }
+
+        function renderCrumbs(parts){
+          bc.innerHTML = '';
+          // home crumb
+          const home = document.createElement('a'); home.href = '#'; home.className = 'crumb'; home.textContent = 'Home';
+          home.addEventListener('click', (ev)=>{ ev.preventDefault(); // clear selection and show root notes
+            tree.querySelectorAll('.folder-item.selected').forEach(n=>n.classList.remove('selected'));
+            if(typeof displayNotes === 'function') displayNotes();
+            bc.style.display = 'none';
+          });
+          bc.appendChild(home);
+
+          parts.forEach((p)=>{
+            const sep = document.createElement('span'); sep.className = 'crumb-sep'; sep.textContent = '›'; bc.appendChild(sep);
+            const a = document.createElement('a'); a.href = '#'; a.className = 'crumb'; a.textContent = p.name || 'Folder';
+            a.addEventListener('click', (ev)=>{ ev.preventDefault(); if(p.el) p.el.click(); else if(p.id){ const t = tree.querySelector(`[data-id="${p.id}"]`); if(t) t.click(); } });
+            bc.appendChild(a);
+          });
+          bc.style.display = parts.length ? 'flex' : 'none';
+        }
+
+        tree.addEventListener('click', (e)=>{
+          const fi = e.target.closest('.folder-item');
+          if(fi){
+            tree.querySelectorAll('.folder-item.selected').forEach(n=>n.classList.remove('selected'));
+            fi.classList.add('selected');
+            const parts = buildPathFromElement(fi);
+            renderCrumbs(parts);
+          }
+        });
+
+        // Observe changes to tree and update breadcrumb if selection remains
+        const mo = new MutationObserver(()=>{ const sel = tree.querySelector('.folder-item.selected'); if(sel) renderCrumbs(buildPathFromElement(sel)); });
+        mo.observe(tree, { childList:true, subtree:true });
+
+        // initial state
+        const sel = tree.querySelector('.folder-item.selected'); if(sel) renderCrumbs(buildPathFromElement(sel));
       })();
     </script>
     <!-- Empty state markup and logic -->

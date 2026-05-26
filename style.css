@@ -1243,6 +1243,16 @@ input:focus, select:focus, textarea:focus{
 
 .editor-toolbar .btn.active{ background: linear-gradient(90deg,var(--accent-1),var(--accent-2)); color:white; border-color:transparent }
 
+/* Breadcrumb */
+.breadcrumb{ display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:8px; background: color-mix(in srgb, var(--surface-color) 92%, transparent); border:1px solid rgba(0,0,0,0.03); margin:12px 0 }
+.breadcrumb .crumb{ color:var(--muted-text-color); text-decoration:none; font-size:0.95rem }
+.breadcrumb .crumb:hover{ text-decoration:underline; color:var(--accent-1) }
+.breadcrumb .crumb-sep{ color:rgba(0,0,0,0.25); margin:0 6px }
+
+@media (max-width:700px){
+    .breadcrumb{ font-size:0.95rem; padding:8px; }
+}
+
 
 /* Make the primary Add Note button more obvious */
 button[onclick="addNote()"]{
