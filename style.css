@@ -574,6 +574,15 @@ button:focus-visible{
 .attendance-row{ display:flex; justify-content:space-between; gap:8px; padding:6px 4px; border-radius:6px }
 .low-attendance{ color: #b91c1c; font-weight:700 }
 
+/* Assignments */
+.assignment-panel{ margin-top:8px; padding:8px; border-radius:6px; border:1px dashed var(--border-color); background: color-mix(in srgb, var(--surface-color) 98%, transparent) }
+.assignments-list{ margin-top:8px; display:flex; flex-direction:column; gap:8px }
+.assignment-row{ display:flex; justify-content:space-between; gap:8px; padding:8px; border-radius:6px; background:var(--surface-2-color); border:1px solid var(--border-color); align-items:center }
+.assignment-meta{ font-size:13px; color:var(--muted-text-color) }
+.assignment-actions button{ margin-left:8px; padding:6px 8px; font-size:13px }
+.assignment-overdue{ color:#b91c1c; font-weight:700 }
+.assignment-due{ font-weight:600 }
+
 
 
 /* Recent history panel (minimal) */

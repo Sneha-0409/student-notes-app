@@ -80,6 +80,11 @@ let attendance = JSON.parse(localStorage.getItem('attendance')) || {};
 
 function saveAttendance(){ try{ localStorage.setItem('attendance', JSON.stringify(attendance)); }catch(e){} }
 
+// Assignments list: {id,title,subject,due:'YYYY-MM-DD',completed:boolean}
+let assignments = JSON.parse(localStorage.getItem('assignments')) || [];
+function saveAssignments(){ try{ localStorage.setItem('assignments', JSON.stringify(assignments)); }catch(e){} }
+
+
 const TAGS_KEY = 'allTags';
 
 function loadGlobalTags(){
@@ -694,6 +699,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // initial attendance panel render
     try{ renderAttendancePanel(); }catch(e){}
+    // Assignments wiring
+    const addAssignmentBtn = document.getElementById('addAssignmentBtn');
+    const assignmentTitle = document.getElementById('assignmentTitle');
+    const assignmentSubject = document.getElementById('assignmentSubject');
+    const assignmentDue = document.getElementById('assignmentDue');
+    if(addAssignmentBtn){
+        addAssignmentBtn.addEventListener('click', ()=>{
+            const t = (assignmentTitle?.value||'').trim();
+            const s = (assignmentSubject?.value||'').trim();
+            const d = assignmentDue?.value || '';
+            if(!t){ alert('Enter assignment title'); return; }
+            addAssignment(t,s,d);
+            assignmentTitle.value = '';
+            if(assignmentSubject) assignmentSubject.value = '';
+            if(assignmentDue) assignmentDue.value = '';
+        });
+    }
+    // render assignments and subject select initially
+    try{ renderAssignmentSubjectSelect(); renderAssignments(); }catch(e){}
     // Live preview handling
     if(noteInput && livePreview && livePreviewToggle){
         const updatePreview = () => {
@@ -927,6 +951,69 @@ function populateFilterSubject(){
     const current = select.value;
     select.innerHTML = '<option value="">All subjects</option>' + known.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
     select.value = current || '';
+}
+
+// ---------------------
+// Assignments helpers
+// ---------------------
+function isOverdue(due){
+    if(!due) return false;
+    const today = formatYMD(new Date());
+    return due < today;
+}
+
+function addAssignment(title, subject, due){
+    if(!title || !title.trim()) return false;
+    const id = 'a_' + (Date.now() + Math.floor(Math.random()*1000));
+    assignments.push({ id, title: title.trim(), subject: subject || '', due: formatYMD(due || new Date()), completed: false });
+    saveAssignments();
+    renderAssignments();
+    return true;
+}
+
+function toggleAssignmentComplete(id){
+    const idx = assignments.findIndex(a=> a.id === id);
+    if(idx === -1) return;
+    assignments[idx].completed = !assignments[idx].completed;
+    saveAssignments();
+    renderAssignments();
+}
+
+function removeAssignment(id){
+    assignments = assignments.filter(a=> a.id !== id);
+    saveAssignments();
+    renderAssignments();
+}
+
+function renderAssignments(){
+    const container = document.getElementById('assignmentsList');
+    if(!container) return;
+    if(assignments.length === 0){ container.innerHTML = '<div class="muted">No assignments</div>'; return; }
+    container.innerHTML = assignments.map(a=>{
+        const overdue = !a.completed && isOverdue(a.due);
+        const overdueClass = overdue ? ' assignment-overdue' : '';
+        const subj = a.subject ? `<span class="assignment-meta">${escapeHtml(a.subject)}</span>` : '';
+        const due = a.due ? `<span class="assignment-due${overdueClass}">${escapeHtml(a.due)}</span>` : '';
+        const title = escapeHtml(a.title) + (a.completed ? ' (done)' : '');
+        return `<div class="assignment-row" id="${a.id}">
+            <div>
+                <div class="assignment-title">${title}</div>
+                <div class="assignment-meta">${subj} ${due}</div>
+            </div>
+            <div class="assignment-actions">
+                <button onclick="toggleAssignmentComplete('${a.id}')">${a.completed ? 'Undo' : 'Complete'}</button>
+                <button onclick="removeAssignment('${a.id}')">Remove</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderAssignmentSubjectSelect(){
+    const sel = document.getElementById('assignmentSubject');
+    if(!sel) return;
+    const keys = Object.keys(subjects || {});
+    const opts = ['<option value="">Subject</option>'].concat(keys.map(k=>`<option value="${escapeHtml(k)}">${escapeHtml(k)}</option>`));
+    sel.innerHTML = opts.join('');
 }
 
 // ---------------------

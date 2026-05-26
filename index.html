@@ -43,6 +43,21 @@
           </div>
           <div id="attendanceSummary" class="attendance-summary"></div>
         </div>
+        <hr style="margin:12px 0" />
+        <h3>Assignments</h3>
+        <div id="assignmentsPanel" class="assignment-panel">
+          <input id="assignmentTitle" placeholder="Assignment title" style="width:100%; padding:6px; margin-bottom:6px" />
+          <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center">
+            <select id="assignmentSubject" style="flex:1">
+              <option value="">Subject</option>
+            </select>
+            <input id="assignmentDue" type="date" />
+          </div>
+          <div style="display:flex; gap:8px; margin-bottom:8px">
+            <button id="addAssignmentBtn" type="button">Add Assignment</button>
+          </div>
+          <div id="assignmentsList" class="assignments-list"></div>
+        </div>
       </aside>
       <div class="input-area">
         <input id="noteTitle" placeholder="Title (optional)" />
