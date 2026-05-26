@@ -1076,7 +1076,7 @@ button:focus, input:focus, textarea:focus, select:focus{ box-shadow: 0 0 0 4px r
 /* Make the top-level container a two-column layout: sidebar + main */
 .container {
     display: grid;
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: auto 1fr; /* sidebar width managed by .sidebar */
     gap: 28px;
     align-items: start;
     max-width: 1100px;
@@ -1100,6 +1100,8 @@ button:focus, input:focus, textarea:focus, select:focus{ box-shadow: 0 0 0 4px r
     border: 1px solid var(--border-color);
     max-height: calc(100vh - 160px);
     overflow: auto;
+    width: 320px; /* explicit width so collapsing can animate */
+    transition: width 240ms ease, padding 180ms ease;
 }
 
 /* Main column */
@@ -1175,6 +1177,25 @@ h3{ margin-top: 0; }
     .page-links{ position: static; margin-top: 8px; text-align: center }
     .sidebar{ order: 2 }
     .main-content{ order: 1 }
+}
+
+/* Collapsible sidebar */
+body.sidebar-collapsed .container{ /* sidebar width visually reduced */ }
+body.sidebar-collapsed .sidebar{ width:72px; padding:8px !important; overflow:visible }
+body.sidebar-collapsed .sidebar > *:not(.sidebar-mini){ display:none !important }
+body.sidebar-collapsed .sidebar-mini{ display:flex; align-items:center; justify-content:center; height:100%; font-size:18px; color:var(--accent-1); flex-direction:column; gap:10px }
+
+/* Mini-nav buttons inside collapsed sidebar */
+.sidebar-mini .mini-btn{ width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:transparent; border:1px solid rgba(0,0,0,0.04); cursor:pointer; color:var(--accent-1); }
+.sidebar-mini .mini-btn:hover{ background: rgba(79,70,229,0.06) }
+.sidebar-mini .mini-btn:active{ transform:translateY(1px) }
+.sidebar-mini .mini-label{ font-size:11px; color:var(--muted-text-color); margin-top:6px }
+/* ensure header toggle is visible */
+.theme-toggle{ z-index:1300 }
+
+@media (max-width:900px){
+    /* on small screens collapse by default (user can expand) */
+    body.sidebar-collapsed .container{ grid-template-columns: 0 1fr !important }
 }
 
 /* Small improvements for accessibility */

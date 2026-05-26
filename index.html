@@ -13,13 +13,22 @@
     <div class="container">
     <header class="site-header">
       <h1>Student Notes App</h1>
-      <div class="page-links">
+      <div style="display:flex; gap:8px; align-items:center">
+        <button id="toggleSidebarBtn" class="theme-toggle" aria-expanded="true" title="Toggle sidebar">☰</button>
+        <div class="page-links">
         <a class="nav-link" href="self-test.html">Weekly Self Test →</a>
+      </div>
       </div>
     </header>
 
     <main class="main-content">
       <aside class="sidebar">
+        <div class="sidebar-mini" aria-hidden="true">
+          <button class="mini-btn" id="miniHome" title="Home" aria-label="Home">🏠</button>
+          <button class="mini-btn" id="miniFolders" title="Folders" aria-label="Folders">📁</button>
+          <button class="mini-btn" id="miniSearch" title="Search" aria-label="Search">🔍</button>
+          <button class="mini-btn" id="miniStickies" title="Stickies" aria-label="Stickies">🗒️</button>
+        </div>
         <h3>Folders</h3>
         <nav id="breadcrumb" class="breadcrumb" aria-label="Breadcrumb" style="display:none"></nav>
         <div id="foldersTree"></div>
@@ -579,6 +588,41 @@
         const savedId = localStorage.getItem('current.folder');
         if(savedId){ const target = tree.querySelector(`[data-id="${savedId}"]`); if(target){ target.click(); renderCrumbs(buildPathFromElement(target)); } }
         const sel = tree.querySelector('.folder-item.selected'); if(!savedId && sel) renderCrumbs(buildPathFromElement(sel));
+      })();
+    </script>
+    <script>
+      // Collapsible sidebar toggle with persistence
+      (function(){
+        const btn = document.getElementById('toggleSidebarBtn');
+        if(!btn) return;
+        function apply(state){
+          if(state){ document.body.classList.add('sidebar-collapsed'); btn.setAttribute('aria-expanded','false'); }
+          else { document.body.classList.remove('sidebar-collapsed'); btn.setAttribute('aria-expanded','true'); }
+          localStorage.setItem('ui.sidebarCollapsed', state ? '1' : '0');
+        }
+        btn.addEventListener('click', ()=> apply(!document.body.classList.contains('sidebar-collapsed')));
+        // restore
+        const saved = localStorage.getItem('ui.sidebarCollapsed');
+        if(saved === '1') apply(true); else apply(false);
+      })();
+    </script>
+    <script>
+      // Mini-nav behavior: wire collapsed icons to actions
+      (function(){
+        const miniHome = document.getElementById('miniHome');
+        const miniFolders = document.getElementById('miniFolders');
+        const miniSearch = document.getElementById('miniSearch');
+        const miniStickies = document.getElementById('miniStickies');
+        const breadcrumb = document.getElementById('breadcrumb');
+        const foldersTree = document.getElementById('foldersTree');
+        const search = document.getElementById('searchInput');
+        const stickyOpen = document.getElementById('openStickyBtn');
+        if(miniHome) miniHome.addEventListener('click', ()=>{ // simulate Home
+          const homeLink = breadcrumb && breadcrumb.querySelector('a.crumb'); if(homeLink){ homeLink.click(); }
+        });
+        if(miniFolders) miniFolders.addEventListener('click', ()=>{ if(foldersTree) foldersTree.scrollIntoView({behavior:'smooth', block:'center'}); });
+        if(miniSearch) miniSearch.addEventListener('click', ()=>{ if(search){ search.focus(); search.scrollIntoView({behavior:'smooth', block:'center'}); } });
+        if(miniStickies) miniStickies.addEventListener('click', ()=>{ if(stickyOpen) stickyOpen.click(); });
       })();
     </script>
     <!-- Empty state markup and logic -->
