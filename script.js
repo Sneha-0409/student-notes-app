@@ -1,4 +1,6 @@
-let notes = JSON.parse(localStorage.getItem("notes")) || [];
+let notes = (JSON.parse(localStorage.getItem("notes")) || []).map(n => 
+    typeof n === 'string' ? { text: n, date: "Created: " + new Date().toLocaleString() } : n
+);
 
 const THEME_KEY = "theme";
 
@@ -164,13 +166,16 @@ function addNote() {
         return;
     }
 
+    if (notes.some(n => n.text === noteText)) {
+
 
     if (notes.includes(noteText)) {
+
         alert("This note already exists!");
         return;
     }
 
-    notes.push(noteText);
+    notes.push({ text: noteText, date: "Created: " + new Date().toLocaleString() });
 
     const newNote = {
         id: Date.now(),
@@ -267,7 +272,8 @@ function displayNotes(){
     notes.forEach((note,index)=>{
         container.innerHTML += `
             <div class="note">
-                ${escapeHtml(note)}
+                <div class="note-text">${escapeHtml(note.text)}</div>
+                <div class="note-date">${note.date}</div>
                 <button class="edit-btn"
                 onclick="editNote(${index})" aria-label="Edit note">
                 Edit
@@ -332,16 +338,16 @@ function displayNotes(){
 
 
 function editNote(index){
-    let newNote = prompt("Edit your note:", notes[index]);
+    let newNote = prompt("Edit your note:", notes[index].text);
     if(newNote !== null && newNote.trim() !== ""){
         let trimmedNote = newNote.trim();
         
-        if (notes.includes(trimmedNote) && notes.indexOf(trimmedNote) !== index) {
+        if (notes.some((n, i) => n.text === trimmedNote && i !== index)) {
             alert("A note with this text already exists!");
             return;
         }
 
-        notes[index] = trimmedNote;
+        notes[index] = { text: trimmedNote, date: "Edited: " + new Date().toLocaleString() };
         localStorage.setItem("notes", JSON.stringify(notes));
         displayNotes();
     }
@@ -350,9 +356,9 @@ function editNote(index){
 function sortNotes() {
     const sortOrder = document.getElementById("sortOrder").value;
     if (sortOrder === "asc") {
-        notes.sort((a, b) => a.localeCompare(b));
+        notes.sort((a, b) => a.text.localeCompare(b.text));
     } else if (sortOrder === "desc") {
-        notes.sort((a, b) => b.localeCompare(a));
+        notes.sort((a, b) => b.text.localeCompare(a.text));
     }
 
     localStorage.setItem("notes", JSON.stringify(notes));
