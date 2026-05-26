@@ -2,6 +2,7 @@ let notes = (JSON.parse(localStorage.getItem("notes")) || []).map(n =>
     typeof n === 'string' ? { text: n, date: "Created: " + new Date().toLocaleString() } : n
 );
 
+let currentView = "list";
 const THEME_KEY = "theme";
 const AUTO_SAVE_KEY = "draft";
 const AUTO_SAVE_DELAY = 2000;
@@ -85,16 +86,7 @@ function addNote() {
         return;
     }
 
-    if (notes.some(n => n.text === noteText)) {
-
-
-    if (notes.includes(noteText)) {
-
-        alert("This note already exists!");
-        return;
-    }
-
-    notes.push({ text: noteText, date: "Created: " + new Date().toLocaleString() });
+    let dueDate = document.getElementById('noteDueDate')?.value || '';
 
     const newNote = {
         id: Date.now(),
@@ -111,7 +103,9 @@ function addNote() {
         subject: subjectText || '',
         folderId: folderId || '',
         sections: gatherSectionsFromEditor(),
-        pinned: false
+        pinned: false,
+        dueDate: dueDate,
+        status: 'todo'
     };
 
     notes.unshift(newNote);
@@ -129,6 +123,7 @@ function addNote() {
     document.getElementById('noteTags').value = '';
     document.getElementById('noteSubject').value = '';
     const folderSelect = document.getElementById('noteFolder'); if(folderSelect) folderSelect.value = '';
+    const dateInput = document.getElementById('noteDueDate'); if(dateInput) dateInput.value = '';
 
     // record new note in recent history and refresh UI
     try{ recordRecent(newNote); }catch(e){}
@@ -169,6 +164,19 @@ function displayNotes() {
 
         const combined =
             (note.title + " " + note.content).toLowerCase();
+    const sortedNotes = [...notes].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+
+    if (currentView === "board") {
+        let todoContainer = document.querySelector("#todo .kanban-content");
+        let doingContainer = document.querySelector("#doing .kanban-content");
+        let doneContainer = document.querySelector("#done .kanban-content");
+        if(todoContainer) todoContainer.innerHTML = "";
+        if(doingContainer) doingContainer.innerHTML = "";
+        if(doneContainer) doneContainer.innerHTML = "";
+    }
+
+    sortedNotes.forEach((note)=>{
+        const combined = (note.title + ' ' + note.content).toLowerCase();
 
         if (q && !combined.includes(q)) return;
 
@@ -269,19 +277,20 @@ function displayNotes() {
 
         // Favorite & Pin buttons
         const favBtn = `<button class="favorite-btn ${note.favorite ? 'active' : ''}" onclick="toggleFavorite('${note.id}')" aria-label="Toggle favorite">${note.favorite ? '★' : '☆'}</button>`;
-        const pinBtn = `<button class="pin-btn" onclick="togglePin('${note.id}')" aria-label="Toggle pin">${note.pinned ? 'Unpin' : 'Pin'}</button>`;
+        const pinBtn = `<button class="pin-btn ${note.pinned ? 'active' : ''}" onclick="togglePin('${note.id}')" title="Pin to top">📌</button>`;
+        const badgeHTML = getDueDateBadgeHTML(note.dueDate);
 
         const noteHtml = `
-            <div class="note">
+            <div class="note ${note.pinned ? 'pinned' : ''}" draggable="true" ondragstart="dragStart(event, '${note.id}')">
                 ${favBtn}
                 ${pinBtn}
                 ${titleHtml}
+                ${badgeHTML}
                 ${contentHtml}
                 ${subjectHtml}
                 ${tagsHtml}
                 ${sectionsHtml}
                 <button class="delete-btn" onclick="deleteNote('${note.id}')" aria-label="Delete note">X</button>
-
             </div>
         `;
 
@@ -289,8 +298,19 @@ function displayNotes() {
             favoritesContainer.innerHTML += noteHtml;
         } else if (note.pinned) {
             pinnedContainer.innerHTML += noteHtml;
+        if (currentView === 'board') {
+            let containerId = note.status === 'doing' ? '#doing' : note.status === 'done' ? '#done' : '#todo';
+            let kCont = document.querySelector(`${containerId} .kanban-content`);
+            if(kCont) kCont.innerHTML += noteHtml;
         } else {
-            container.innerHTML += noteHtml;
+            if(note.favorite){
+                // favorites shown in dedicated section
+                if(favoritesContainer) favoritesContainer.innerHTML += noteHtml;
+            } else if(note.pinned){
+                pinnedContainer.innerHTML += noteHtml;
+            } else {
+                container.innerHTML += noteHtml;
+            }
         }
     });
 }
