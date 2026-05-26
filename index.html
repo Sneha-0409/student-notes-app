@@ -251,6 +251,66 @@
         window.addEventListener('load', ()=> setTimeout(()=>{ if(typeof displayNotes==='function') displayNotes(); }, 600));
       })();
     </script>
+    <!-- Empty state markup and logic -->
+    <div id="emptyState" class="empty-state" style="display:none" aria-hidden="true">
+      <div class="empty-art" aria-hidden="true">
+        <!-- simple illustrative SVG -->
+        <svg width="140" height="100" viewBox="0 0 140 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="18" width="128" height="64" rx="8" fill="url(#g)" />
+          <rect x="18" y="28" width="36" height="8" rx="3" fill="rgba(255,255,255,0.6)" />
+          <rect x="18" y="44" width="92" height="8" rx="3" fill="rgba(255,255,255,0.45)" />
+          <rect x="18" y="60" width="64" height="8" rx="3" fill="rgba(255,255,255,0.35)" />
+          <defs>
+            <linearGradient id="g" x1="0" x2="1">
+              <stop offset="0" stop-color="#f3f4f6" />
+              <stop offset="1" stop-color="#eef2ff" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <h3>No notes yet</h3>
+      <p>Create visually appealing empty state screens when no notes, folders, or data are available. Quick actions help users get started.</p>
+      <div class="empty-actions">
+        <button id="createFirstNote" class="btn primary">Create First Note</button>
+        <button id="importSample" class="btn">Import Sample</button>
+      </div>
+    </div>
+    <script>
+      (function(){
+        const empty = document.getElementById('emptyState');
+        const container = document.getElementById('notesContainer');
+        if(!empty || !container) return;
+        function updateEmpty(){
+          const hasNote = !!container.querySelector('.note');
+          empty.style.display = hasNote ? 'none' : 'flex';
+          empty.setAttribute('aria-hidden', hasNote ? 'true' : 'false');
+        }
+        // initial check after load
+        window.addEventListener('load', ()=> setTimeout(updateEmpty, 200));
+        // observe changes to notes container
+        const observer = new MutationObserver(updateEmpty);
+        observer.observe(container, { childList:true, subtree:true });
+
+        // Actions
+        document.getElementById('createFirstNote').addEventListener('click', ()=>{
+          if(typeof addNote === 'function') return addNote();
+          const title = prompt('Note title');
+          if(!title) return;
+          const notes = JSON.parse(localStorage.getItem('notes')||'[]');
+          notes.unshift({ id: Date.now(), title: title, content: '' });
+          localStorage.setItem('notes', JSON.stringify(notes));
+          if(typeof displayNotes === 'function') displayNotes(); else updateEmpty();
+        });
+
+        document.getElementById('importSample').addEventListener('click', ()=>{
+          const sample = [
+            { id: Date.now(), title: 'Welcome', content: 'This is a sample note to help you get started.' }
+          ];
+          localStorage.setItem('notes', JSON.stringify(sample));
+          if(typeof displayNotes === 'function') displayNotes(); else updateEmpty();
+        });
+      })();
+    </script>
     </div>
 </body>
 </html>

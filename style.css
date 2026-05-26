@@ -1248,6 +1248,34 @@ button[onclick="addNote()"]{
 
 @keyframes shimmer{ 0%{ background-position:200% 0 } 100%{ background-position:-200% 0 } }
 
+/* Empty state */
+.empty-state{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    padding:28px;
+    color:var(--muted,#6b7280);
+    text-align:center;
+    border-radius:12px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4));
+    box-shadow: 0 6px 18px rgba(12,18,30,0.06);
+    border: 1px solid rgba(15,23,42,0.04);
+}
+.empty-state .empty-art{ width:160px; height:120px; display:flex; align-items:center; justify-content:center; }
+.empty-state h3{ margin:0; color:var(--text,#0f172a); font-size:1.15rem; }
+.empty-state p{ margin:0; font-size:0.95rem; max-width:36rem; color:var(--muted,#6b7280); }
+.empty-actions{ display:flex; gap:10px; margin-top:6px; }
+.empty-actions .btn{ padding:8px 12px; border-radius:8px; cursor:pointer; }
+.empty-actions .btn.primary{ background:var(--primary,#4767f6); color:white; border:none; }
+.empty-actions .btn:not(.primary){ background:transparent; border:1px solid rgba(15,23,42,0.06); }
+
+@media (max-width:700px){
+    .empty-state{ padding:18px; }
+    .empty-state .empty-art{ width:120px; height:90px; }
+}
+
 
 
 
