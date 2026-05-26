@@ -8,145 +8,81 @@
 </head>
 <body>
   <div class="container">
-    <header class="site-header">
-        <h1>Student Notes App</h1>
+    <header class="app-header">
+        <h1>Student Notes</h1>
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+          <span class="theme-icon theme-icon--sun">☀️</span>
+          <span class="theme-icon theme-icon--moon" style="display:none">🌙</span>
+        </button>
     </header>
-
-        <div class="page-links">
-            <a class="nav-link" href="self-test.html">Weekly Self Test →</a>
-        </div>
-
-
-    <div class="container">
-        <div class="input-area">
-            <textarea id="noteInput" placeholder="Write your note here..."></textarea>
 
     <main class="main-content">
       <aside class="sidebar">
-        <h3>Folders</h3>
-        <div id="foldersTree"></div>
-        <div style="margin-top:10px; display:flex; gap:8px">
-          <input id="newFolderName" placeholder="New folder name" style="flex:1; padding:6px" />
-          <button id="addFolderBtn" type="button">Add</button>
-        </div>
-        <hr style="margin:12px 0" />
-        <h3>Subjects</h3>
-        <div id="subjectsList"></div>
-        <div style="margin-top:8px; display:flex; gap:8px; align-items:center">
-          <input id="newSubjectName" placeholder="New subject" style="flex:1; padding:6px" />
-          <input id="newSubjectColor" type="color" value="#ffd966" title="Pick color" />
-          <button id="addSubjectBtn" type="button">Add</button>
-        </div>
-        <hr style="margin:12px 0" />
-        <h3>Attendance</h3>
-        <div id="attendancePanel" class="attendance-panel">
-          <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px">
-            <select id="attendanceSubject" style="flex:1">
-              <option value="">Select subject</option>
-            </select>
-            <input id="attendanceDate" type="date" />
+        <div class="sidebar-section">
+          <h3>Folders</h3>
+          <div id="foldersTree"></div>
+          <div class="sidebar-input-group">
+            <input id="newFolderName" placeholder="New folder..." />
+            <button id="addFolderBtn" type="button">+</button>
           </div>
-          <div style="display:flex; gap:8px; margin-bottom:8px">
-            <button id="markPresentBtn" type="button">Present</button>
-            <button id="markAbsentBtn" type="button">Absent</button>
-          </div>
-          <div id="attendanceSummary" class="attendance-summary"></div>
         </div>
-        <hr style="margin:12px 0" />
-        <h3>Assignments</h3>
-        <div id="assignmentsPanel" class="assignment-panel">
-          <input id="assignmentTitle" placeholder="Assignment title" style="width:100%; padding:6px; margin-bottom:6px" />
-          <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center">
-            <select id="assignmentSubject" style="flex:1">
+
+        <div class="sidebar-section">
+          <h3>Subjects</h3>
+          <div id="subjectsList"></div>
+          <div class="sidebar-input-group">
+            <input id="newSubjectName" placeholder="New subject..." />
+            <input id="newSubjectColor" type="color" value="#3b82f6" title="Pick color" />
+            <button id="addSubjectBtn" type="button">+</button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3>Attendance</h3>
+          <div id="attendancePanel" class="attendance-panel">
+            <select id="attendanceSubject">
               <option value="">Subject</option>
             </select>
-            <input id="assignmentDue" type="date" />
+            <div class="sidebar-input-group">
+              <button id="markPresentBtn" type="button" class="btn-small">Present</button>
+              <button id="markAbsentBtn" type="button" class="btn-small btn-danger">Absent</button>
+            </div>
           </div>
-          <div style="display:flex; gap:8px; margin-bottom:8px">
-            <button id="addAssignmentBtn" type="button">Add Assignment</button>
-          </div>
-          <div id="assignmentsList" class="assignments-list"></div>
         </div>
       </aside>
-      <div class="input-area">
-        <input id="noteTitle" placeholder="Title (optional)" />
-        <textarea id="noteInput" placeholder="Write your note here... (Markdown supported)"></textarea>
-        <div class="input-row">
-          <input id="noteTags" placeholder="Tags (comma separated)" />
-          <input id="noteSubject" placeholder="Subject / Category (optional)" />
-          <select id="noteFolder" aria-label="Folder" title="Folder">
-            <option value="">No folder</option>
-          </select>
-        </div>
-        <!-- Sections: minimal structured blocks inside a note -->
-        <div id="sectionsArea" style="margin-top:10px">
-          <label style="display:block; margin-bottom:6px; color:var(--muted-text-color)">Sections</label>
-          <div id="sectionsList"></div>
-          <div style="display:flex; gap:8px; margin-top:8px; align-items:center">
-            <select id="newSectionType">
-              <option value="lecture">Lecture</option>
-              <option value="important">Important</option>
-              <option value="formula">Formula / Reference</option>
-              <option value="summary">Summary</option>
-              <option value="code">Code / Example</option>
+
+      <div class="content-area">
+        <section class="editor-section">
+          <input id="noteTitle" class="title-input" placeholder="Note Title (optional)" />
+          <textarea id="noteInput" placeholder="Write your note here... (Markdown supported)"></textarea>
+          
+          <div class="input-grid">
+            <input id="noteTags" placeholder="Tags (e.g. exam, lab)" />
+            <input id="noteSubject" placeholder="Subject" />
+            <select id="noteFolder">
+              <option value="">No folder</option>
             </select>
-            <button id="addSectionBtn">Add Section</button>
           </div>
-        </div>
-        <div class="input-row actions">
-          <label><input type="checkbox" id="livePreviewToggle" /> Live preview</label>
-          <div style="display:flex; align-items:center; gap:10px">
-            <button onclick="addNote()">Add Note</button>
-            <span id="saveStatus" class="save-status" aria-live="polite"></span>
+
+          <div class="editor-footer">
+            <label><input type="checkbox" id="livePreviewToggle" /> Live preview</label>
+            <button onclick="addNote()" class="primary-btn">Save Note</button>
           </div>
-        </div>
+          <div id="livePreview" class="live-preview" style="display:none"></div>
+        </section>
 
-        <div id="livePreview" class="live-preview" aria-hidden="true"></div>
-      </div>
-
-      <section class="search-area">
-        <input id="searchInput" placeholder="Search notes by title or content..." />
-        <div class="filters">
-          <input id="filterTags" placeholder="Filter by tag (comma separated)" />
-          <select id="filterSubject">
-            <option value="">All subjects</option>
+        <section class="search-section">
+          <input id="searchInput" placeholder="Search notes..." />
+          <select id="sortOrder" onchange="sortNotes()">
+            <option value="" selected disabled>Sort by</option>
+            <option value="asc">A-Z</option>
+            <option value="desc">Z-A</option>
           </select>
-        </div>
-          <div class="suggested-tags-area">
-            <input id="newTagInput" placeholder="Add tag" />
-            <button id="addTagBtn" type="button">Add Tag</button>
-            <div id="suggestedTags" class="suggested-tags"></div>
-          </div>
-      </section>
+        </section>
+
+        <div id="notesContainer" class="notes-grid"></div>
+      </div>
     </main>
-
-    <footer class="site-footer">
-        <p>© 2026 Student Notes App. All rights reserved.</p>
-    </footer>
-
-    <div class="sort-controls">
-      <select id="sortOrder" onchange="sortNotes()">
-        <option value="" selected disabled>Sort Alphabetically</option>
-        <option value="asc">A to Z</option>
-        <option value="desc">Z to A</option>
-      </select>
-    </div>
-
-    <div id="notesContainer"></div>
-  
-    <section id="pinnedSection" class="pinned-section" aria-labelledby="pinnedHeading" style="display:none">
-      <h2 id="pinnedHeading">Pinned Notes</h2>
-      <div id="pinnedContainer"></div>
-    </section>
-    <section id="favoritesSection" class="favorites-section" aria-labelledby="favoritesHeading" style="display:none">
-      <h2 id="favoritesHeading">Favorites</h2>
-      <div id="favoritesContainer"></div>
-    </section>
-      <!-- Minimal Recent History: shows recently opened or edited notes for quick access -->
-      <section id="recentSection" class="recent-section" aria-labelledby="recentHeading" style="display:block">
-        <h2 id="recentHeading">Recent</h2>
-        <div id="recentContainer" class="recent-container"></div>
-      </section>
   </div>
 
   <script src="script.js"></script>
@@ -156,4 +92,3 @@
 
 </body>
 </html>
-

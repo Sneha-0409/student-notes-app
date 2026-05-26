@@ -2,7 +2,7 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:Arial,sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 /* =========================
@@ -43,7 +43,7 @@
     --input-bg: #0b1220;
 
     --primary-bg: #3b82f6;          /* blue-500 */
-    --primary-bg-hover: #2563eb;    /* blue-600 */
+    --primary-bg-hover: #1d4ed8;    /* blue-700 */
     --primary-text: #ffffff;
 
     --danger-bg: #ef4444;       /* red-500 */
@@ -60,173 +60,19 @@
 body{
     background:var(--bg-color);
     color:var(--text-color);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:50px 20px;
+    min-height: 100vh;
+    padding: 20px;
 }
 
 .container{
-    width:100%;
-    max-width:500px;
-    background:white;
-    width:500px;
+    max-width: 1200px;
+    margin: 0 auto;
     background:var(--surface-color);
-
-    padding:20px;
-    border-radius:10px;
+    padding: 24px;
+    border-radius: 16px;
     box-shadow:0px 0px 10px var(--shadow-color);
 }
 
-.page-links{
-    display:flex;
-    justify-content:flex-end;
-    margin-bottom:10px;
-}
-
-.nav-link{
-    display:inline-block;
-    text-decoration:none;
-    color:#007bff;
-    font-weight:bold;
-}
-
-.nav-link:hover{
-    text-decoration:underline;
-}
-
-.topbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:10px;
-}
-
-.timer{
-    font-weight:bold;
-}
-
-.card{
-    background:#ffffcc;
-    padding:15px;
-    margin-top:15px;
-    border-radius:5px;
-}
-
-.card-title{
-    margin-bottom:10px;
-    font-size:18px;
-}
-
-.selftest-controls{
-    margin-top:10px;
-}
-
-.checkbox{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    user-select:none;
-}
-
-.question-meta{
-    font-size:14px;
-    opacity:0.8;
-    margin-bottom:8px;
-}
-
-.question-text{
-    font-size:16px;
-    margin-bottom:12px;
-}
-
-.options{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-.option{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:10px;
-    border:1px solid #ddd;
-    border-radius:5px;
-    background:#fff;
-    cursor:pointer;
-}
-
-.option input{
-    cursor:pointer;
-}
-
-.selftest-nav{
-    display:flex;
-    gap:10px;
-    margin-top:10px;
-}
-
-.selftest-nav button{
-    width:50%;
-}
-
-.result-main{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-}
-
-.result-score{
-    font-size:32px;
-    font-weight:bold;
-}
-
-.result-note{
-    font-size:14px;
-    opacity:0.85;
-}
-
-.stats{
-    display:flex;
-    gap:10px;
-}
-
-.stat{
-    width:33.33%;
-    background:#fff;
-    border:1px solid #ddd;
-    border-radius:5px;
-    padding:10px;
-}
-
-.stat-label{
-    font-size:13px;
-    opacity:0.8;
-    margin-bottom:6px;
-}
-
-.stat-value{
-    font-size:18px;
-    font-weight:bold;
-}
-
-@media (max-width: 600px){
-    body{
-        padding:20px;
-    }
-
-    .stats{
-        flex-direction:column;
-    }
-
-    .stat{
-        width:100%;
-    }
-}
-
-h1{
-    text-align:center;
 .app-header{
     display:flex;
     align-items:center;
@@ -239,6 +85,84 @@ h1{
     text-align:center;
     margin-bottom:0;
     font-size:24px;
+}
+
+/* =========================
+   Main Grid Layout
+   ========================= */
+.main-content {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+/* Sidebar */
+.sidebar {
+    border-right: 1px solid var(--border-color);
+    padding-right: 20px;
+}
+
+.sidebar-section {
+    margin-bottom: 24px;
+}
+
+.sidebar h3 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted-text-color);
+    margin-bottom: 12px;
+}
+
+.sidebar-input-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.sidebar-input-group input {
+    flex: 1;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    font-size: 0.85rem;
+}
+
+.btn-small {
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    width: auto;
+    margin-top: 0;
+}
+
+/* Content Area */
+.editor-section {
+    background: var(--bg-color);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.title-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
 }
 
 /* =========================
@@ -304,134 +228,6 @@ textarea{
                 border-color 0.3s ease;
 }
 
-
-/* Search & filters */
-.search-area{
-    margin-top:16px;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-}
-
-.search-area input[type="text"], .search-area input, .filters input, .filters select, #noteTitle, #noteTags, #noteSubject, #searchInput{
-    width:100%;
-    padding:8px 10px;
-    border:1px solid var(--border-color);
-    border-radius:6px;
-    background:var(--input-bg);
-    color:var(--text-color);
-}
-
-.input-row{ display:flex; gap:8px; }
-.input-row.actions{ align-items:center; justify-content:space-between; margin-top:8px }
-.input-row.actions label{ font-size:14px; color:var(--muted-text-color) }
-
-.live-preview{
-    margin-top:12px;
-    padding:12px;
-    border-radius:6px;
-    border:1px dashed var(--border-color);
-    background: color-mix(in srgb, var(--input-bg) 92%, transparent);
-    color:var(--text-color);
-    display:none;
-    max-height:220px;
-    overflow:auto;
-}
-
-.save-status{
-    font-size:13px;
-    color:var(--muted-text-color);
-    min-width:80px;
-    display:inline-block;
-}
-
-.pinned-section{ margin-top:16px }
-.pinned-section h2{ margin:0 0 8px 0; font-size:16px }
-
-.pin-btn{
-    position:absolute;
-    left:10px;
-    top:8px;
-    background:transparent;
-    border:1px solid var(--border-color);
-    color:var(--text-color);
-    padding:4px 8px;
-    border-radius:6px;
-    cursor:pointer;
-}
-
-.note{ position:relative }
-
-.favorites-section{ margin-top:16px }
-.favorites-section h2{ margin:0 0 8px 0; font-size:16px }
-
-.favorite-btn{
-    position:absolute;
-    left:10px;
-    top:8px;
-    background:transparent;
-    border:1px solid var(--border-color);
-    color:var(--text-color);
-    padding:4px 8px;
-    border-radius:6px;
-    cursor:pointer;
-}
-
-.favorite-btn.active{
-    background: #ffd966;
-    border-color: #f4c542;
-}
-
-.pin-btn{ left:70px }
-
-/* Markdown rendering basics */
-.live-preview h1, .note-content h1{ font-size:20px; margin:6px 0 }
-.live-preview h2, .note-content h2{ font-size:18px; margin:6px 0 }
-.live-preview pre, .note-content pre{ background:var(--input-bg); padding:8px; border-radius:4px; overflow:auto }
-.live-preview code, .note-content code{ background:rgba(0,0,0,0.04); padding:2px 4px; border-radius:4px }
-.live-preview table, .note-content table{ border-collapse:collapse; width:100% }
-.live-preview table th, .live-preview table td, .note-content table th, .note-content table td{ border:1px solid var(--border-color); padding:6px }
-
-.filters{
-    display:flex;
-    gap:8px;
-}
-
-.filters input{ flex:1 }
-.filters select{ width:160px }
-
-.note-title{
-    font-weight:700;
-    margin-bottom:6px;
-}
-
-.note-content{
-    white-space:pre-wrap;
-}
-
-.note-subject{
-    margin-top:8px;
-    font-size:13px;
-    color:var(--muted-text-color);
-}
-
-.note-tags{ margin-top:8px }
-.tag{
-    display:inline-block;
-    background:var(--primary-bg);
-    color:var(--primary-text);
-    padding:4px 8px;
-    border-radius:999px;
-    margin-right:6px;
-    font-size:12px;
-}
-
-mark.highlight{
-    background: #ffef7f;
-    padding:0 2px;
-    border-radius:2px;
-}
-
 textarea::placeholder{
     color: color-mix(in srgb, var(--muted-text-color) 80%, transparent);
 }
@@ -466,18 +262,27 @@ button:focus-visible{
    Sorting Controls
    ========================= */
 .sort-controls {
-    margin-top: 15px;
     display: flex;
     justify-content: flex-end;
+    margin-bottom: 15px;
 }
 
 #sortOrder {
-    padding: 8px;
-    border-radius: 5px;
+    padding: 8px 12px;
+    border-radius: 8px;
     border: 1px solid var(--border-color);
     background: var(--input-bg);
     color: var(--text-color);
     cursor: pointer;
+}
+
+/* =========================
+   Notes Grid
+   ========================= */
+.notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
 }
 
 /* =========================
@@ -496,15 +301,31 @@ button:focus-visible{
     background:var(--surface-2-color);
     color:var(--text-color);
     padding:15px;
-    margin-top:15px;
-    border-radius:5px;
+    border-radius:12px;
     position:relative;
-
-    padding-right: 85px;
+    box-shadow: 0 2px 4px var(--shadow-color-soft);
     word-wrap: break-word;
+    transition: transform 0.2s ease;
+}
 
-    transition: background-color 0.3s ease,
-                color 0.3s ease;
+.note:hover {
+    transform: translateY(-2px);
+}
+
+.note-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.note-tag {
+    display: inline-block;
+    background: rgba(0,0,0,0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    margin-right: 4px;
 }
 
 .note-date{
@@ -515,107 +336,35 @@ button:focus-visible{
     font-style: italic;
 }
 
-.edit-btn{
+.note-actions {
     position:absolute;
     top:5px;
-    right:45px;
-    background:var(--primary-bg);
-    color:var(--primary-text);
-    border:none;
-    width:auto;
-    padding:5px 10px;
-    cursor:pointer;
-    border-radius:6px;
-
-    transition: background-color 0.3s ease,
-                color 0.3s ease,
-                transform 0.1s ease;
-}
-
-.edit-btn:hover{
-    background:var(--primary-bg-hover);
-}
-
-.edit-btn:focus-visible{
-    outline:3px solid color-mix(in srgb, var(--primary-bg) 60%, transparent);
-    outline-offset:2px;
-
-
-    transition: background-color 0.3s ease,
-                color 0.3s ease;
-
-}
-
-.delete-btn{
-    position:absolute;
-    top:5px;
-    right:10px;
-    background:var(--danger-bg);
-    color:var(--danger-text);
-    border:none;
-    width:auto;
-    padding:5px 10px;
-    cursor:pointer;
-}
-
-.backup-panel {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px dashed #ddd;
-    border-radius: 5px;
-    background: #fafafa;
-}
-
-.backup-panel h3 {
-    font-size: 11px;
-    color: #777;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
-}
-
-.backup-actions {
+    right:5px;
     display: flex;
-    gap: 12px;
+    gap: 4px;
 }
 
-/* Unified style rule for both the button and the label */
-.backup-btn {
-    flex: 1;
-    display: inline-block;
-    text-align: center;
-    background: #f0f0f0;
-    color: #444;
-    border: 1px solid #ccc;
+.icon-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 4px;
-    padding: 8px 0; /* Vertical padding only to ensure matching heights */
-    font-size: 13px;
-    margin: 10px 0px 0px;
-    font-weight: 500;
-    cursor: pointer;
-    user-select: none;
-    transition: all 0.15s ease-in-out;
-    box-sizing: border-box; /* Eliminates box model variations */
-    font-family: inherit;
+    font-size: 12px;
 }
 
-.backup-btn:hover {
-    background: #e5e5e5;
-    border-color: #bbb;
-    color: #222;
-}
-
-.backup-btn:active {
-    background: #dadada;
-}
-
-
-    border-radius:6px;
-
-    transition: background-color 0.3s ease,
-                color 0.3s ease,
-                transform 0.1s ease;
+/* =========================
+   Responsive
+   ========================= */
+@media (max-width: 768px){
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    .input-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .delete-btn:hover{
@@ -634,141 +383,3 @@ button:focus-visible{
     body{ padding:20px; }
     .container{ width:100%; }
 }
-
-}
-
-/* Header styles */
-.site-header{
-    background:#007bff;
-    color:white;
-    padding:18px 20px;
-    border-radius:10px;
-    margin-bottom:16px;
-    text-align:center;
-    width:500px;
-    box-shadow:0px 2px 8px rgba(0,0,0,0.08);
-}
-.site-header h1{
-    margin:0;
-    font-size:18px;
-    font-weight:700;
-}
-
-/* Footer styles */
-.site-footer{
-    width:100%;
-    max-width:680px;
-    background:white;
-    color:#666;
-    padding:12px 20px;
-    border-radius:10px;
-    margin-top:18px;
-    text-align:center;
-    box-shadow:0px 2px 8px rgba(0,0,0,0.06);
-    font-size:14px;
-}
-
-/* Main layout with sidebar */
-.main-content{
-    display:flex;
-    gap:20px;
-    width:100%;
-    max-width:680px;
-    align-items:flex-start;
-}
-
-.sidebar{
-    width:160px;
-    background:white;
-    padding:12px 14px;
-    border-radius:10px;
-    box-shadow:0px 2px 8px rgba(0,0,0,0.06);
-}
-
-.sidebar nav ul{
-    list-style:none;
-}
-
-.sidebar nav ul li{
-    margin:8px 0;
-}
-
-.sidebar nav ul li a{
-    color:#007bff;
-    text-decoration:none;
-    font-weight:600;
-}
-
-/* Folder tree minimal styles */
-.sidebar h3{ margin:0 0 8px 0; font-size:14px }
-.folder-list{ list-style:none; padding-left:8px }
-.folder-item{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 4px; border-radius:6px }
-.folder-item .name{ cursor:pointer; color:var(--text-color) }
-.folder-item.selected{ background: color-mix(in srgb, var(--primary-bg) 8%, transparent); }
-.folder-actions button{ margin-left:6px; padding:4px 6px; font-size:12px }
-
-
-/* Subjects */
-.subject-chip{
-    display:inline-block;
-    padding:4px 8px;
-    border-radius:999px;
-    font-size:12px;
-    color:#111;
-    margin-right:6px;
-}
-.subject-item{ display:flex; align-items:center; justify-content:space-between; padding:6px 4px; border-radius:6px }
-.subject-list{ list-style:none; padding-left:0; margin:6px 0 }
-.subject-list .subject-row{ display:flex; align-items:center; gap:8px }
-
-/* Note sections */
-.section-block{ background: color-mix(in srgb, var(--surface-2-color) 90%, transparent); padding:8px; border-radius:6px; margin-top:8px; border:1px solid var(--border-color) }
-.section-header{ display:flex; justify-content:space-between; align-items:center; gap:8px }
-.section-type{ font-weight:700; font-size:13px; color:var(--muted-text-color) }
-.section-content{ margin-top:8px }
-.section-content textarea{ height:80px; }
-.section-remove{ background:transparent; border:1px solid var(--border-color); padding:4px 6px; border-radius:6px; cursor:pointer }
-
-/* Attendance panel */
-.attendance-panel{ margin-top:8px; padding:8px; border-radius:6px; border:1px dashed var(--border-color); background: color-mix(in srgb, var(--surface-color) 96%, transparent) }
-.attendance-summary{ margin-top:6px; font-size:13px }
-.attendance-row{ display:flex; justify-content:space-between; gap:8px; padding:6px 4px; border-radius:6px }
-.low-attendance{ color: #b91c1c; font-weight:700 }
-
-/* Assignments */
-.assignment-panel{ margin-top:8px; padding:8px; border-radius:6px; border:1px dashed var(--border-color); background: color-mix(in srgb, var(--surface-color) 98%, transparent) }
-.assignments-list{ margin-top:8px; display:flex; flex-direction:column; gap:8px }
-.assignment-row{ display:flex; justify-content:space-between; gap:8px; padding:8px; border-radius:6px; background:var(--surface-2-color); border:1px solid var(--border-color); align-items:center }
-.assignment-meta{ font-size:13px; color:var(--muted-text-color) }
-.assignment-actions button{ margin-left:8px; padding:6px 8px; font-size:13px }
-.assignment-overdue{ color:#b91c1c; font-weight:700 }
-.assignment-due{ font-weight:600 }
-
-
-
-/* Recent history panel (minimal) */
-.recent-section{ margin-top:16px }
-.recent-section h2{ margin:0 0 8px 0; font-size:16px }
-.recent-container{ display:flex; flex-direction:column; gap:8px }
-.recent-item{
-    display:flex;
-    justify-content:space-between;
-    gap:8px;
-    align-items:center;
-    background:var(--surface-2-color);
-    padding:8px 10px;
-    border-radius:6px;
-    font-size:13px;
-    color:var(--text-color);
-}
-.recent-item .meta{ color:var(--muted-text-color); font-size:12px }
-.open-btn{
-    position:relative;
-    background:transparent;
-    border:1px solid var(--border-color);
-    padding:6px 8px;
-    border-radius:6px;
-    cursor:pointer;
-}
-
-
