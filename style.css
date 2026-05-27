@@ -560,6 +560,7 @@ button:hover {
     border: 1px solid #E5E7EB;
     box-shadow: var(--shadow-sm);
     transition: all 0.3s ease;
+
 }
 
 .secondary-btn:hover {
@@ -922,6 +923,7 @@ button:hover {
     padding: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
+
 }
 
 .kanban-column h2 {
