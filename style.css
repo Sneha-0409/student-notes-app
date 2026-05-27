@@ -25,6 +25,13 @@ body {
     justify-content: center;
     padding: 40px 20px;
     color: var(--text-main);
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
 }
 
 /* =========================
@@ -65,7 +72,7 @@ body {
     --input-bg: #0b1220;
 
     --primary-bg: #3b82f6;          /* blue-500 */
-    --primary-bg-hover: #2563eb;    /* blue-600 */
+    --primary-bg-hover: #1d4ed8;    /* blue-700 */
     --primary-text: #ffffff;
 
     --danger-bg: #ef4444;       /* red-500 */
@@ -86,174 +93,19 @@ body{
     background-attachment: fixed;
     background-size: cover;
     color:var(--text-color);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:50px 20px;
+    min-height: 100vh;
+    padding: 20px;
 }
 
 .container{
-    width:100%;
-    max-width:500px;
-    background:white;
-    width:500px;
+    max-width: 1200px;
+    margin: 0 auto;
     background:var(--surface-color);
-
-    padding:20px;
-    border-radius:10px;
+    padding: 24px;
+    border-radius: 16px;
     box-shadow:0px 0px 10px var(--shadow-color);
 }
 
-.page-links{
-    display:flex;
-    justify-content:flex-end;
-    margin-bottom:10px;
-}
-
-.nav-link{
-    display:inline-block;
-    text-decoration:none;
-    color:#007bff;
-    font-weight:bold;
-}
-
-.nav-link:hover{
-    text-decoration:underline;
-}
-
-.topbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:10px;
-}
-
-.timer{
-    font-weight:bold;
-}
-
-.card{
-    background:#ffffcc;
-    padding:15px;
-    margin-top:15px;
-    border-radius:5px;
-}
-
-.card-title{
-    margin-bottom:10px;
-    font-size:18px;
-}
-
-.selftest-controls{
-    margin-top:10px;
-}
-
-.checkbox{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    user-select:none;
-}
-
-.question-meta{
-    font-size:14px;
-    opacity:0.8;
-    margin-bottom:8px;
-}
-
-.question-text{
-    font-size:16px;
-    margin-bottom:12px;
-}
-
-.options{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-.option{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:10px;
-    border:1px solid #ddd;
-    border-radius:5px;
-    background:#fff;
-    cursor:pointer;
-}
-
-.option input{
-    cursor:pointer;
-}
-
-.selftest-nav{
-    display:flex;
-    gap:10px;
-    margin-top:10px;
-}
-
-.selftest-nav button{
-    width:50%;
-}
-
-.result-main{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-}
-
-.result-score{
-    font-size:32px;
-    font-weight:bold;
-}
-
-.result-note{
-    font-size:14px;
-    opacity:0.85;
-}
-
-.stats{
-    display:flex;
-    gap:10px;
-}
-
-.stat{
-    width:33.33%;
-    background:#fff;
-    border:1px solid #ddd;
-    border-radius:5px;
-    padding:10px;
-}
-
-.stat-label{
-    font-size:13px;
-    opacity:0.8;
-    margin-bottom:6px;
-}
-
-.stat-value{
-    font-size:18px;
-    font-weight:bold;
-}
-
-@media (max-width: 600px){
-    body{
-        padding:20px;
-    }
-
-    .stats{
-        flex-direction:column;
-    }
-
-    .stat{
-        width:100%;
-    }
-}
-
-h1{
-    text-align:center;
-}
 .app-header{
     display:flex;
     align-items:center;
@@ -266,6 +118,95 @@ h1{
     text-align:center;
     margin-bottom:0;
     font-size:24px;
+}
+
+/* =========================
+   Main Grid Layout
+   ========================= */
+.main-content {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+/* Sidebar */
+.sidebar {
+    border-right: 1px solid var(--border-color);
+    padding-right: 20px;
+}
+
+.sidebar-section {
+    margin-bottom: 24px;
+}
+
+.sidebar h3 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted-text-color);
+    margin-bottom: 12px;
+}
+
+.sidebar-input-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.sidebar-input-group input {
+    flex: 1;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    font-size: 0.85rem;
+}
+
+.btn-small {
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    width: auto;
+    margin-top: 0;
+}
+
+/* Content Area */
+.editor-section {
+    background: var(--bg-color);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+
+.title-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-color);
+
+h1{
+    text-align:center;
+}
+.app-header{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+
+}
+
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
 }
 
 /* =========================
@@ -330,6 +271,10 @@ textarea{
                 color 0.3s ease,
                 border-color 0.3s ease;
 }
+
+
+textarea::placeholder{
+    color: color-mix(in srgb, var(--muted-text-color) 80%, transparent);
 
 
 /* Search & filters */
@@ -472,6 +417,7 @@ h1 {
     color: var(--primary);
     font-size: 2.2rem;
     letter-spacing: -0.5px;
+
 }
 
 .input-area {
@@ -518,6 +464,76 @@ button:hover {
     box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
 }
 
+
+/* =========================
+   Sorting Controls
+   ========================= */
+.sort-controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+}
+
+#sortOrder {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+/* =========================
+   Notes Grid
+   ========================= */
+.notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+/* =========================
+   Empty State
+   ========================= */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted-text-color);
+    border: 2px dashed var(--border-color);
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.note{
+    background:var(--surface-2-color);
+    color:var(--text-color);
+    padding:15px;
+    border-radius:12px;
+    position:relative;
+    box-shadow: 0 2px 4px var(--shadow-color-soft);
+    word-wrap: break-word;
+    transition: transform 0.2s ease;
+}
+
+.note:hover {
+    transform: translateY(-2px);
+}
+
+.note-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.note-tag {
+    display: inline-block;
+    background: rgba(0,0,0,0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    margin-right: 4px;
+
 .view-controls {
     display: flex;
     justify-content: flex-end;
@@ -545,6 +561,37 @@ button:hover {
     color: var(--muted-text-color);
     font-style: italic;
 }
+
+
+.note-actions {
+    position:absolute;
+    top:5px;
+    right:5px;
+    display: flex;
+    gap: 4px;
+}
+
+.icon-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* =========================
+   Responsive
+   ========================= */
+@media (max-width: 768px){
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    .input-grid {
+        grid-template-columns: 1fr;
+    }
 
 .edit-btn{
     position:absolute;
@@ -832,6 +879,7 @@ button:hover {
     padding: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
+
 }
 
 .kanban-column h2 {
@@ -847,6 +895,15 @@ button:hover {
     background: rgba(255, 255, 255, 0.8);
     transform: scale(1.02);
     box-shadow: 0 10px 25px rgba(79, 70, 229, 0.15);
+}
+
+
+/* =========================
+   Responsive
+   ========================= */
+@media (max-width: 520px){
+    body{ padding:20px; }
+    .container{ width:100%; }
 }
 
 .kanban-content {
@@ -1075,6 +1132,7 @@ button:focus, input:focus, textarea:focus, select:focus{ box-shadow: 0 0 0 4px r
     border-radius:6px;
     cursor:pointer;
 }
+
 
 /* =========================
    UI Enhancements (overrides)
@@ -1381,8 +1439,3 @@ button[onclick="addNote()"]{
     .empty-state{ padding:18px; }
     .empty-state .empty-art{ width:120px; height:90px; }
 }
-
-
-
-
-

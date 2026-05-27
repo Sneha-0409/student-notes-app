@@ -16,6 +16,11 @@ localStorage.setItem("notes", JSON.stringify(notes));
 let currentView = "list";
 const THEME_KEY = "theme";
 
+
+displayNotes();
+initTheme();
+
+
 let currentView = "list"; // default view
 
 displayNotes();
@@ -202,17 +207,37 @@ function toggleView() {
 }
 
 function addNote() {
-    let title = document.getElementById("noteTitle").value.trim();
     let input = document.getElementById("noteInput");
+    let titleInput = document.getElementById("noteTitle");
+    let tagsInput = document.getElementById("noteTags");
+    let subjectInput = document.getElementById("noteSubject");
+    
     let noteText = input.value.trim();
-    let tagsText = document.getElementById('noteTags').value.trim();
-    let subjectText = document.getElementById('noteSubject').value.trim();
-    let folderId = document.getElementById('noteFolder')?.value || '';
+    let titleText = titleInput.value.trim();
 
     if(noteText === ""){
         alert("Please enter a note");
         return;
     }
+
+
+    notes.push({ 
+        text: noteText, 
+        title: titleText,
+        tags: tagsInput.value,
+        subject: subjectInput.value,
+        date: "Created: " + new Date().toLocaleString() 
+    });
+
+    localStorage.setItem(
+        "notes",
+        JSON.stringify(notes)
+    );
+
+    input.value = "";
+    titleInput.value = "";
+    tagsInput.value = "";
+    subjectInput.value = "";
 
     let newNote = {
         id: Date.now(),
@@ -255,34 +280,46 @@ function addNote() {
     const folderSelect = document.getElementById('noteFolder'); if(folderSelect) folderSelect.value = '';
     const dateInput = document.getElementById('noteDueDate'); if(dateInput) dateInput.value = '';
 
-    // record new note in recent history and refresh UI
-    try{ recordRecent(newNote); }catch(e){}
-    refreshFilters();
+
     displayNotes();
-
-    // Clear any saved draft after successful save
-    clearDraft();
-
-    // update global tags list and suggestions
-    addGlobalTags(newNote.tags);
-    renderSuggestedTags();
-
-    // ensure subject exists in subjects map (use default color if missing)
-    if(newNote.subject && !subjects[newNote.subject]){
-        subjects[newNote.subject] = '#ffd966';
-        try{ localStorage.setItem('subjects', JSON.stringify(subjects)); }catch(e){}
-        try{ renderSubjects(); }catch(e){}
-    }
 }
 
 function displayNotes(){
     const sortedNotes = [...notes].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
     let container = document.getElementById("notesContainer");
-
-    let pinnedContainer = document.getElementById('pinnedContainer');
-    const pinnedSection = document.getElementById('pinnedSection');
-
     container.innerHTML = "";
+
+
+    if (notes.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <p>No notes found. Start by adding your first note above!</p>
+            </div>
+        `;
+        return;
+    }
+
+    notes.forEach((note,index)=>{
+        const tagsHtml = note.tags ? note.tags.split(',').map(t => `<span class="note-tag">#${t.trim()}</span>`).join('') : '';
+        
+        container.innerHTML += `
+            <div class="note">
+                <div class="note-actions">
+                    <button class="icon-btn edit-btn" onclick="editNote(${index})" aria-label="Edit">✎</button>
+                    <button class="icon-btn delete-btn" onclick="deleteNote(${index})" aria-label="Delete">✕</button>
+                </div>
+                ${note.title ? `<strong class="note-title">${escapeHtml(note.title)}</strong>` : ''}
+                <div class="note-text">${escapeHtml(note.text)}</div>
+                <div class="note-footer" style="margin-top:10px">
+                    ${tagsHtml}
+                </div>
+                <div class="note-date">${note.date}</div>
+            </div>
+        `;
+    });
+}
+
+
     pinnedContainer.innerHTML = "";
 
     const q = searchQuery.trim();
@@ -446,6 +483,7 @@ function togglePin(id) {
     let note = notes.find(n => n.id === id);
     if (note) {
         note.pinned = !note.pinned;
+
 function editNote(index){
     let newNote = prompt("Edit your note:", notes[index].text);
     if(newNote !== null && newNote.trim() !== ""){
@@ -476,6 +514,69 @@ function sortNotes() {
 
 function deleteNote(index){
     notes.splice(index,1);
+
+
+    localStorage.setItem(
+        "notes",
+        JSON.stringify(notes)
+    );
+
+    displayNotes();
+}
+
+function initTheme(){
+    const toggleBtn = document.getElementById("themeToggle");
+
+    const savedTheme = localStorage.getItem(THEME_KEY); // "light" | "dark" | null
+    const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    // Priority: saved preference -> system -> light
+    const initialTheme = savedTheme === "dark" || savedTheme === "light"
+        ? savedTheme
+        : (systemPrefersDark ? "dark" : "light");
+
+    applyTheme(initialTheme, false);
+
+    if(toggleBtn){
+        toggleBtn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            applyTheme(next, true);
+        });
+    }
+}
+
+function applyTheme(theme, persist){
+    document.documentElement.setAttribute('data-theme', theme);
+
+    if(persist){
+        localStorage.setItem(THEME_KEY, theme);
+    }
+
+    // Update toggle icon for better UX
+    const sunIcon = document.querySelector('.theme-icon--sun');
+    const moonIcon = document.querySelector('.theme-icon--moon');
+
+    if(sunIcon && moonIcon){
+        if(theme === 'dark'){
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'inline';
+        } else {
+            sunIcon.style.display = 'inline';
+            moonIcon.style.display = 'none';
+        }
+    }
+}
+
+// Basic XSS protection since we render notes as HTML via innerHTML.
+function escapeHtml(str){
+    return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '<')
+        .replaceAll('>', '>')
+        .replaceAll('"', '"')
+        .replaceAll("'", '&#039;');
+}
 
 // Walk DOM and wrap matching text in <mark> elements (case-insensitive)
 function highlightInElement(element, query){
@@ -1114,4 +1215,5 @@ function openNote(id){
 document.addEventListener('DOMContentLoaded', ()=>{
     try{ renderRecent(); }catch(e){}
 });
+
 
