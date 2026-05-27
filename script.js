@@ -31,11 +31,27 @@ let currentView = "list"; // default view
 displayNotes();
 initTheme();
 
+let notes = JSON.parse(localStorage.getItem("notes")) || [];
+const THEME_KEY = "theme";
+
 // Auto-save configuration
 const AUTO_SAVE_KEY = 'draft';
 const AUTO_SAVE_DELAY = 2000; // ms of inactivity before saving
 let autoSaveTimer = null;
 
+// UI state
+let searchQuery = "";
+let filterTags = [];
+let filterSubject = "";
+let globalTags = [];
+const TAGS_KEY = 'allTags';
+
+// Initialize application data flow
+normalizeNotes();
+
+// ==========================================
+// Core Functions: Auto-save & Drafts
+// ==========================================
 function scheduleAutoSave(){
     const statusEl = document.getElementById('saveStatus');
     if(statusEl) statusEl.textContent = 'Saving...';
@@ -43,9 +59,7 @@ function scheduleAutoSave(){
     autoSaveTimer = setTimeout(()=>{
         saveDraft();
         if(statusEl) {
-            const time = new Date();
             statusEl.textContent = 'Saved';
-            // briefly show saved then clear after 2s
             setTimeout(()=>{ if(statusEl) statusEl.textContent = ''; }, 2000);
         }
         autoSaveTimer = null;
@@ -58,20 +72,129 @@ function saveDraft(){
     const tags = document.getElementById('noteTags')?.value || '';
     const subject = document.getElementById('noteSubject')?.value || '';
 
-    const draft = {
-        title, content, tags, subject, savedAt: Date.now()
-    };
+    const draft = { title, content, tags, subject, savedAt: Date.now() };
     try{ localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(draft)); }catch(e){ console.warn('Failed to save draft', e); }
 }
 
-let currentView = "list"; // default view
+function restoreDraft(){
+    try{
+        const raw = localStorage.getItem(AUTO_SAVE_KEY);
+        if(!raw) return false;
+        const draft = JSON.parse(raw);
+        
+        const currentContent = document.getElementById('noteInput')?.value || '';
+        const currentTitle = document.getElementById('noteTitle')?.value || '';
+        if(currentContent || currentTitle) return false;
 
-normalizeNotes();
+        if(draft.title) document.getElementById('noteTitle').value = draft.title;
+        if(draft.content) document.getElementById('noteInput').value = draft.content;
+        if(draft.tags) document.getElementById('noteTags').value = draft.tags;
+        if(draft.subject) document.getElementById('noteSubject').value = draft.subject;
 
-displayNotes();
-initTheme();
-setupInputListeners();
-updateSidebar();
+        const statusEl = document.getElementById('saveStatus');
+        if(statusEl) statusEl.textContent = 'Restored draft';
+        setTimeout(()=>{ if(statusEl) statusEl.textContent = ''; }, 2000);
+        return true;
+    }catch(e){ return false; }
+}
+
+function clearDraft(){
+    try{ localStorage.removeItem(AUTO_SAVE_KEY); }catch(e){}
+}
+
+// UI state
+let searchQuery = "";
+let filterTags = [];
+let filterSubject = "";
+let globalTags = [];
+// Folder model: simple parent-relation tree
+let folders = JSON.parse(localStorage.getItem('folders')) || [];
+let currentFolder = null; // currently selected folder id (string)
+// Subjects mapping: name -> color (hex)
+let subjects = JSON.parse(localStorage.getItem('subjects')) || {};
+// Attendance mapping: subject -> [{date:'YYYY-MM-DD', status:'present'|'absent'}]
+let attendance = JSON.parse(localStorage.getItem('attendance')) || {};
+
+function saveAttendance(){ try{ localStorage.setItem('attendance', JSON.stringify(attendance)); }catch(e){} }
+
+// Assignments list: {id,title,subject,due:'YYYY-MM-DD',completed:boolean}
+let assignments = JSON.parse(localStorage.getItem('assignments')) || [];
+function saveAssignments(){ try{ localStorage.setItem('assignments', JSON.stringify(assignments)); }catch(e){} }
+
+
+const TAGS_KEY = 'allTags';
+
+// ==========================================
+// Tag Management & Recommendations
+// ==========================================
+function loadGlobalTags(){
+    try{ globalTags = JSON.parse(localStorage.getItem(TAGS_KEY)) || []; }catch(e){ globalTags = []; }
+}
+
+function saveGlobalTags(){
+    try{ localStorage.setItem(TAGS_KEY, JSON.stringify(globalTags)); }catch(e){}
+}
+
+function addGlobalTags(tags){
+    if(!Array.isArray(tags)) return;
+    tags.forEach(t=>{
+        const val = String(t).trim();
+        if(!val) return;
+        const exists = globalTags.some(gt=>gt.toLowerCase() === val.toLowerCase());
+        if(!exists) globalTags.push(val);
+    });
+    saveGlobalTags();
+}
+
+function renderSuggestedTags(){
+    const container = document.getElementById('suggestedTags');
+    if(!container) return;
+    const counts = {};
+    notes.forEach(n=> (n.tags||[]).forEach(t=>{ counts[t] = (counts[t]||0)+1 }));
+    const list = Array.from(new Set([].concat(globalTags, Object.keys(counts))));
+    list.sort((a,b)=> (counts[b]||0) - (counts[a]||0) || a.localeCompare(b));
+    container.innerHTML = list.map(t=>`<button type="button" class="suggested-tag" onclick="applyTagFilter(${JSON.stringify(t)})">${escapeHtml(t)}${counts[t] ? ' ('+counts[t]+')' : ''}</button>`).join(' ');
+}
+
+function applyTagFilter(tag){
+    if(!tag) return;
+    filterTags = [String(tag)];
+    const filterTagsInput = document.getElementById('filterTags');
+    if(filterTagsInput) filterTagsInput.value = tag;
+    displayNotes();
+}
+
+function normalizeNotes(){
+    notes = notes.map(n => {
+        if(typeof n === 'string'){
+            const lines = n.split('\n').map(l=>l.trim()).filter(Boolean);
+            return {
+                id: Date.now() + Math.floor(Math.random()*1000),
+                title: lines[0] || '',
+                content: lines.slice(1).join('\n') || lines[0] || '',
+                tags: [],
+                subject: '',
+                pinned: false,
+                favorite: false
+            };
+        }
+        return {
+            id: n.id || (Date.now() + Math.floor(Math.random()*1000)),
+            title: n.title || '',
+            content: n.content || '',
+            sections: Array.isArray(n.sections) ? n.sections : [],
+            tags: Array.isArray(n.tags) ? n.tags : (n.tags ? String(n.tags).split(',').map(s=>s.trim()).filter(Boolean) : []),
+            subject: n.subject || '',
+            pinned: !!n.pinned,
+            favorite: !!n.favorite
+        };
+    });
+
+    localStorage.setItem('notes', JSON.stringify(notes));
+    loadGlobalTags();
+    notes.forEach(n=> addGlobalTags(n.tags||[]));
+}
+
 
 function toggleView() {
     currentView = currentView === "list" ? "board" : "list";
@@ -92,6 +215,9 @@ function toggleView() {
     displayNotes();
 }
 
+// ==========================================
+// Note Actions: Add, Display, Edit, Delete
+// ==========================================
 function addNote() {
 
     const input = document.getElementById("noteInput");
@@ -104,13 +230,11 @@ function addNote() {
     const titleText = titleInput.value.trim();
 
     let title = document.getElementById("noteTitle").value.trim();
-    let input = document.getElementById("noteInput");
-    let titleInput = document.getElementById("noteTitle");
-    let tagsInput = document.getElementById("noteTags");
-    let subjectInput = document.getElementById("noteSubject");
-    
-    let noteText = input.value.trim();
-    let titleText = titleInput.value.trim();
+    let noteInputEl = document.getElementById("noteInput");
+    let noteText = noteInputEl.value.trim();
+    let tagsText = document.getElementById('noteTags').value.trim();
+    let subjectText = document.getElementById('noteSubject').value.trim();
+    let folderId = document.getElementById('noteFolder')?.value || '';
 
     if(noteText === ""){
         alert("Please enter a note");
@@ -189,16 +313,28 @@ function addNote() {
 
     notes.push(newNote);
 
+        pinned: false,
+        favorite: false
+    };
+
+    notes.unshift(newNote);
     localStorage.setItem("notes", JSON.stringify(notes));
     input.value = "";
 
     document.getElementById('noteTitle').value = '';
-    document.getElementById('noteInput').value = '';
+    noteInputEl.value = '';
     document.getElementById('noteTags').value = '';
     document.getElementById('noteSubject').value = '';
     const folderSelect = document.getElementById('noteFolder'); if(folderSelect) folderSelect.value = '';
     const dateInput = document.getElementById('noteDueDate'); if(dateInput) dateInput.value = '';
 
+    // record new note in recent history and refresh UI
+    try{ recordRecent(newNote); }catch(e){}
+    refreshFilters();
+    displayNotes();
+    clearDraft();
+    addGlobalTags(newNote.tags);
+    renderSuggestedTags();
 
     displayNotes();
 }
@@ -206,13 +342,27 @@ function addNote() {
 function displayNotes(){
     const sortedNotes = [...notes].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
     let container = document.getElementById("notesContainer");
-    const showArchived = document.getElementById("showArchived")?.checked || false;
-    const searchQuery = document.getElementById("searchInput")?.value.toLowerCase() || "";
-    const sortOrder = document.getElementById("sortOrder")?.value || "";
+    let pinnedContainer = document.getElementById('pinnedContainer');
+    const pinnedSection = document.getElementById('pinnedSection');
+    let favoritesContainer = document.getElementById('favoritesContainer');
+    const favoritesSection = document.getElementById('favoritesSection');
+
+    if(!container) return;
 
     container.innerHTML = "";
+    if(pinnedContainer) pinnedContainer.innerHTML = "";
+    if(favoritesContainer) favoritesContainer.innerHTML = "";
 
-    pinnedContainer.innerHTML = "";
+    if (notes.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <p>No notes found. Start by adding your first note above!</p>
+            </div>
+        `;
+        if(pinnedSection) pinnedSection.style.display = 'none';
+        if(favoritesSection) favoritesSection.style.display = 'none';
+        return;
+    }
 
     const q = searchQuery.trim();
     const tagsFilter = filterTags.map(t=>t.toLowerCase());
@@ -233,24 +383,18 @@ function displayNotes(){
     }
 
     sortedNotes.forEach((note)=>{
+    notes.forEach((note)=>{
         const combined = (note.title + ' ' + note.content).toLowerCase();
 
-        // Filter by search query
-        if(q){
-            if(!combined.includes(q.toLowerCase())) return;
-        }
+        if(q && !combined.includes(q.toLowerCase())) return;
 
-        // Filter by tags
         if(tagsFilter.length){
             const noteTags = (note.tags || []).map(t=>t.toLowerCase());
             const hasTag = tagsFilter.every(t=>noteTags.includes(t));
             if(!hasTag) return;
         }
 
-        // Filter by subject
-        if(subjectFilter){
-            if((note.subject || '').toLowerCase() !== subjectFilter) return;
-        }
+        if(subjectFilter && (note.subject || '').toLowerCase() !== subjectFilter) return;
 
         // Filter by folder (include descendants)
         if(currentFolder){
@@ -260,7 +404,6 @@ function displayNotes(){
 
         const titleHtml = note.title ? `<div class="note-title">${escapeHtml(note.title)}</div>` : '';
 
-        // Render markdown to HTML safely and then highlight text nodes
         let rawHtml = '';
         try{
             if(window.marked){
@@ -439,6 +582,7 @@ function displayNotes(){
         const tmp = document.createElement('div');
         tmp.innerHTML = safeHtml;
         if(q) highlightInElement(tmp, q);
+
         const contentHtml = `<div class="note-content">${tmp.innerHTML}</div>`;
         const subjectColor = (note.subject && subjects[note.subject]) ? sanitizeColor(subjects[note.subject]) : '';
         const subjectHtml = note.subject ? `<div class="note-subject"><span class="subject-chip" style="background:${subjectColor};">${escapeHtml(note.subject)}</span></div>` : '';
@@ -461,7 +605,6 @@ function displayNotes(){
         }).join('');
         const tagsHtml = (note.tags || []).length ? `<div class="note-tags">${note.tags.map(t=>`<button type="button" class="tag" onclick="applyTagFilter(${JSON.stringify(t)})">${escapeHtml(t)}</button>`).join('')}</div>` : '';
 
-        // Favorite & Pin buttons
         const favBtn = `<button class="favorite-btn ${note.favorite ? 'active' : ''}" onclick="toggleFavorite('${note.id}')" aria-label="Toggle favorite">${note.favorite ? '★' : '☆'}</button>`;
         const pinBtn = `<button class="pin-btn ${note.pinned ? 'active' : ''}" onclick="togglePin('${note.id}')" title="Pin to top">📌</button>`;
         const badgeHTML = getDueDateBadgeHTML(note.dueDate);
@@ -484,6 +627,10 @@ function displayNotes(){
             let containerId = note.status === 'doing' ? '#doing' : note.status === 'done' ? '#done' : '#todo';
             let kCont = document.querySelector(`${containerId} .kanban-content`);
             if(kCont) kCont.innerHTML += noteHtml;
+        if(note.favorite && favoritesContainer){
+            favoritesContainer.innerHTML += noteHtml;
+        } else if(note.pinned && pinnedContainer){
+            pinnedContainer.innerHTML += noteHtml;
         } else {
             if(note.favorite){
                 // favorites shown in dedicated section
@@ -536,24 +683,51 @@ function togglePin(id) {
     if (note) {
         note.pinned = !note.pinned;
 
-function editNote(index){
-    const note = notes[index];
-    const newText = prompt("Edit your note content:", note.text);
-    if(newText !== null && newText.trim() !== ""){
-        notes[index] = { 
-            ...note, 
-            text: newText.trim(), 
-            date: "Edited: " + new Date().toLocaleString() 
-        };
+        notes[index] = { text: trimmedNote, date: "Edited: " + new Date().toLocaleString() };
+    if(pinnedContainer && pinnedSection){
+        pinnedSection.style.display = pinnedContainer.children.length ? '' : 'none';
+    }
+    if(favoritesContainer && favoritesSection){
+        favoritesSection.style.display = favoritesContainer.children.length ? '' : 'none';
+    }
+
+    renderSuggestedTags();
+}
+
+function editNote(id){
+    const idx = notes.findIndex(n=>String(n.id) === String(id));
+    if(idx === -1) return;
+    
+    let newContent = prompt("Edit your note content:", notes[idx].content);
+    if(newContent !== null && newContent.trim() !== ""){
+        notes[idx].content = newContent.trim();
         localStorage.setItem("notes", JSON.stringify(notes));
         displayNotes();
     }
 }
 
-function toggleArchive(index) {
-    notes[index].archived = !notes[index].archived;
-    notes[index].date = (notes[index].archived ? "Archived: " : "Restored: ") + new Date().toLocaleString();
+function deleteNote(id){
+    const idx = notes.findIndex(n=>String(n.id) === String(id));
+    if(idx === -1) return;
+    notes.splice(idx,1);
     localStorage.setItem("notes", JSON.stringify(notes));
+    refreshFilters();
+    displayNotes();
+}
+
+function togglePin(id){
+    const idx = notes.findIndex(n=>String(n.id) === String(id));
+    if(idx === -1) return;
+    notes[idx].pinned = !notes[idx].pinned;
+    localStorage.setItem('notes', JSON.stringify(notes));
+    displayNotes();
+}
+
+function toggleFavorite(id){
+    const idx = notes.findIndex(n=>String(n.id) === String(id));
+    if(idx === -1) return;
+    notes[idx].favorite = !notes[idx].favorite;
+    localStorage.setItem('notes', JSON.stringify(notes));
     displayNotes();
 }
 
@@ -563,108 +737,17 @@ function sortNotes() {
         notes.sort((a, b) => a.text.localeCompare(b.text));
     } else if (sortOrder === "desc") {
         notes.sort((a, b) => b.text.localeCompare(a.text));
+        notes.sort((a, b) => (a.title || a.content).localeCompare(b.title || b.content));
+    } else if (sortOrder === "desc") {
+        notes.sort((a, b) => (b.title || b.content).localeCompare(a.title || a.content));
     }
-
     localStorage.setItem("notes", JSON.stringify(notes));
     displayNotes();
 }
 
-function deleteNote(index){
-    notes.splice(index,1);
-
-
-    localStorage.setItem(
-        "notes",
-        JSON.stringify(notes)
-    );
-
-    displayNotes();
-}
-
-function initTheme(){
-    const toggleBtn = document.getElementById("themeToggle");
-
-    const savedTheme = localStorage.getItem(THEME_KEY); // "light" | "dark" | null
-    const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    // Priority: saved preference -> system -> light
-    const initialTheme = savedTheme === "dark" || savedTheme === "light"
-        ? savedTheme
-        : (systemPrefersDark ? "dark" : "light");
-
-    applyTheme(initialTheme, false);
-
-    if(toggleBtn){
-        toggleBtn.addEventListener('click', () => {
-            const current = document.documentElement.getAttribute('data-theme') || 'light';
-            const next = current === 'dark' ? 'light' : 'dark';
-            applyTheme(next, true);
-        });
-    }
-}
-
-function applyTheme(theme, persist){
-    document.documentElement.setAttribute('data-theme', theme);
-
-    if(persist){
-        localStorage.setItem(THEME_KEY, theme);
-    }
-
-    // Update toggle icon for better UX
-    const sunIcon = document.querySelector('.theme-icon--sun');
-    const moonIcon = document.querySelector('.theme-icon--moon');
-
-    if(sunIcon && moonIcon){
-        if(theme === 'dark'){
-            sunIcon.style.display = 'none';
-            moonIcon.style.display = 'inline';
-        } else {
-            sunIcon.style.display = 'inline';
-            moonIcon.style.display = 'none';
-        }
-    }
-}
-
-// Basic XSS protection since we render notes as HTML via innerHTML.
-function escapeHtml(str){
-    return String(str)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '<')
-        .replaceAll('>', '>')
-        .replaceAll('"', '"')
-        .replaceAll("'", '&#039;');
-}
-
-function setupInputListeners() {
-    // Map input IDs to their respective actions
-    const inputs = [
-        { id: "searchInput", action: displayNotes },
-        { id: "noteTitle", action: addNote },
-        { id: "noteInput", action: addNote, isTextArea: true },
-        { id: "noteTags", action: addNote },
-        { id: "noteSubject", action: addNote },
-        { id: "newFolderName", action: addFolder },
-        { id: "newSubjectName", action: addSubject }
-    ];
-
-    const noteInput = document.getElementById("noteInput");
-    const previewToggle = document.getElementById("livePreviewToggle");
-
-    inputs.forEach(inputConfig => {
-        const el = document.getElementById(inputConfig.id);
-        if (el) {
-            el.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
-                    if (!inputConfig.isTextArea || e.ctrlKey || e.metaKey) {
-                        e.preventDefault();
-                        inputConfig.action();
-                    }
-                }
-            });
-        }
-    });
-
-// Walk DOM and wrap matching text in <mark> elements (case-insensitive)
+// ==========================================
+// Search Highlight Helpers & Security
+// ==========================================
 function highlightInElement(element, query){
     if(!query) return;
     const q = String(query).trim();
@@ -752,8 +835,16 @@ function drop(event) {
     };
     reader.readAsText(file);
 }
+function escapeHtml(str){
+    return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
+
 function refreshFilters(){
-    // Populate subjects dropdown
     const select = document.getElementById('filterSubject');
     if(!select) return;
     const subjects = Array.from(new Set(notes.map(n=> (n.subject||'').trim()).filter(Boolean)));
@@ -770,7 +861,9 @@ function refreshFilters(){
     renderAttendancePanel();
 }
 
-// Search and filter input wiring
+// ==========================================
+// Application & Theme Setup Event Observers
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
     const filterTagsInput = document.getElementById('filterTags');
@@ -781,7 +874,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const titleInput = document.getElementById('noteTitle');
     const tagsInput = document.getElementById('noteTags');
     const subjectInput = document.getElementById('noteSubject');
-    const saveStatus = document.getElementById('saveStatus');
 
     if(searchInput){
         searchInput.addEventListener('input', (e)=>{
@@ -799,20 +891,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (oldStatus !== 'done' && newStatus === 'done') {
                 showToast("🎉 Congratulations on completing a task!");
     refreshFilters();
-    // Restore any unsaved draft if present
     restoreDraft();
-    // Wire autosave to inputs
+    displayNotes();
+
     [noteInput, titleInput, tagsInput, subjectInput].forEach(inp=>{
         if(!inp) return;
-        inp.addEventListener('input', ()=>{
-            scheduleAutoSave();
-        });
+        inp.addEventListener('input', scheduleAutoSave);
     });
-    // Wire suggested tag add
+
     const newTagInput = document.getElementById('newTagInput');
     const addTagBtn = document.getElementById('addTagBtn');
     if(addTagBtn && newTagInput){
-        addTagBtn.addEventListener('click', ()=>{
+        addTagBtn.addEventListener('click', () => {
             const v = (newTagInput.value||'').trim();
             if(!v) return;
             addGlobalTags([v]);
@@ -902,6 +992,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // render assignments and subject select initially
     try{ renderAssignmentSubjectSelect(); renderAssignments(); }catch(e){}
     // Live preview handling
+
     if(noteInput && livePreview && livePreviewToggle){
         const updatePreview = () => {
             const isOn = livePreviewToggle.checked;
@@ -1205,4 +1296,61 @@ function addQuickTag(tag) {
         currentTags.splice(tagIndex, 1);
     }
     tagsInput.value = currentTags.join(', ');
+}
+
+// Render recent on load
+document.addEventListener('DOMContentLoaded', ()=>{
+    try{ renderRecent(); }catch(e){}
+});
+
+            livePreview.style.display = 'block';
+            const raw = noteInput.value || '';
+            let html = raw;
+            try{ html = window.marked ? marked.parse(raw) : escapeHtml(raw); }catch(e){ html = escapeHtml(raw); }
+            const safe = (window.DOMPurify && DOMPurify.sanitize) ? DOMPurify.sanitize(html) : html;
+            livePreview.innerHTML = safe;
+        };
+        noteInput.addEventListener('input', updatePreview);
+        livePreviewToggle.addEventListener('change', updatePreview);
+    }
+
+    // Initialize Theme Logic Control
+    initTheme();
+});
+
+// ==========================================
+// Theme Logic Engine
+// ==========================================
+function initTheme(){
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('theme'); 
+    const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    const initialTheme = savedTheme === "dark" || savedTheme === "light"
+        ? savedTheme
+        : (systemPrefersDark ? "dark" : "light");
+
+    applyTheme(initialTheme);
+
+    if(themeToggleBtn){
+        themeToggleBtn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+        });
+    }
+}
+
+function applyTheme(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if(themeToggleBtn){
+        if(theme === 'dark'){
+            themeToggleBtn.textContent = '☀️ Light Mode';
+        } else {
+            themeToggleBtn.textContent = '🌙 Dark Mode';
+        }
+    }
 }
