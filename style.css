@@ -191,6 +191,41 @@ body{
     color: var(--text-color);
 }
 
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.tags-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.quick-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.tag-pill {
+    width: auto;
+    margin-top: 0;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    border-radius: 20px;
+    background: var(--shadow-color-soft);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+
+.tag-pill:hover {
+    background: var(--primary-bg);
+    color: var(--primary-text);
+    border-color: var(--primary-bg);
 
 .input-grid {
     display: grid;
@@ -205,7 +240,6 @@ h1{
     align-items:center;
     justify-content:center;
     position:relative;
-    margin-bottom:20px;
 
 }
 
@@ -542,12 +576,6 @@ button:hover {
     box-shadow: 0 2px 4px var(--shadow-color-soft);
     word-wrap: break-word;
     transition: transform 0.2s ease;
-}
-
-.note.pinned {
-    border: 2px solid var(--primary-bg);
-    box-shadow: 0 4px 12px var(--shadow-color);
-
 .view-controls {
     display: flex;
     justify-content: flex-end;
@@ -578,11 +606,16 @@ button:hover {
 
 }
 
+.note.pinned {
+    border: 2px solid var(--primary-bg);
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+
 .note.archived {
     opacity: 0.8;
     background: var(--surface-color);
 }
-
 
 .note:hover {
     transform: translateY(-2px);
@@ -1483,4 +1516,5 @@ button[onclick="addNote()"]{
     .empty-state{ padding:18px; }
     .empty-state .empty-art{ width:120px; height:90px; }
 }
+
 

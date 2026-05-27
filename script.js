@@ -144,7 +144,6 @@ function addNote() {
 
 
 
-
     if(noteText === "" && titleText === ""){
         alert("Please enter a title or note content");
         return;
@@ -353,6 +352,62 @@ function displayNotes(){
     notes.forEach((note,index)=>{
         if (!!note.archived !== showArchived) return;
         if (searchQuery && !note.title.toLowerCase().includes(searchQuery) && !note.text.toLowerCase().includes(searchQuery)) return;
+
+        const tagsHtml = note.tags ? note.tags.split(',').map(t => `<span class="note-tag">#${t.trim()}</span>`).join('') : '';
+        
+        container.innerHTML += `
+            <div class="note ${note.pinned ? 'pinned' : ''} ${note.archived ? 'archived' : ''}">
+                <div class="note-actions">
+                    <button class="icon-btn pin-btn" onclick="togglePin(${index})" title="${note.pinned ? 'Unpin' : 'Pin'}">
+                        ${note.pinned ? '📍' : '📌'}
+                    </button>
+                    <button class="icon-btn archive-btn" onclick="toggleArchive(${index})" title="${note.archived ? 'Restore' : 'Archive'}">
+                        ${note.archived ? '📥' : '📦'}
+                    </button>
+                    <button class="icon-btn edit-btn" onclick="editNote(${index})" aria-label="Edit">✎</button>
+                    <button class="icon-btn delete-btn" onclick="deleteNote(${index})" aria-label="Delete">✕</button>
+                </div>
+                ${note.title ? `<strong class="note-title">${escapeHtml(note.title)}</strong>` : ''}
+                <div class="note-text">${renderMarkdown(note.text)}</div>
+                <div class="note-footer" style="margin-top:10px">
+                    ${tagsHtml}
+                </div>
+                <div class="note-date">${note.date}</div>
+            </div>
+        `;
+    });
+}
+
+
+    // Sort Logic: Pinned first, then by the selected Sort Order
+    notes.sort((a, b) => {
+        if (a.pinned !== b.pinned) return b.pinned ? 1 : -1;
+        
+        if (sortOrder === "asc") return (a.title || a.text).localeCompare(b.title || b.text);
+        if (sortOrder === "desc") return (b.title || b.text).localeCompare(a.title || a.text);
+        return 0;
+    });
+
+
+    if (notes.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <p>No notes found. Start by adding your first note above!</p>
+            </div>
+        `;
+        return;
+    }
+
+    notes.forEach((note,index)=>{
+        if (!!note.archived !== showArchived) return;
+        if (searchQuery) {
+            const matches = 
+                (note.title || "").toLowerCase().includes(searchQuery) ||
+                (note.text || "").toLowerCase().includes(searchQuery) ||
+                (note.tags || "").toLowerCase().includes(searchQuery) ||
+                (note.subject || "").toLowerCase().includes(searchQuery);
+            if (!matches) return;
+        }
 
         const tagsHtml = note.tags ? note.tags.split(',').map(t => `<span class="note-tag">#${t.trim()}</span>`).join('') : '';
         
@@ -1018,61 +1073,6 @@ function populateFilterSubject(){
     select.value = current || '';
 }
 
-// ---------------------
-// Assignments helpers
-// ---------------------
-function isOverdue(due){
-    if(!due) return false;
-    const today = formatYMD(new Date());
-    return due < today;
-}
-
-function addAssignment(title, subject, due){
-    if(!title || !title.trim()) return false;
-    const id = 'a_' + (Date.now() + Math.floor(Math.random()*1000));
-    assignments.push({ id, title: title.trim(), subject: subject || '', due: formatYMD(due || new Date()), completed: false });
-    saveAssignments();
-    renderAssignments();
-    return true;
-}
-
-function toggleAssignmentComplete(id){
-    const idx = assignments.findIndex(a=> a.id === id);
-    if(idx === -1) return;
-    assignments[idx].completed = !assignments[idx].completed;
-    saveAssignments();
-    renderAssignments();
-}
-
-function removeAssignment(id){
-    assignments = assignments.filter(a=> a.id !== id);
-    saveAssignments();
-    renderAssignments();
-}
-
-function renderAssignments(){
-    const container = document.getElementById('assignmentsList');
-    if(!container) return;
-    if(assignments.length === 0){ container.innerHTML = '<div class="muted">No assignments</div>'; return; }
-    container.innerHTML = assignments.map(a=>{
-        const overdue = !a.completed && isOverdue(a.due);
-        const overdueClass = overdue ? ' assignment-overdue' : '';
-        const subj = a.subject ? `<span class="assignment-meta">${escapeHtml(a.subject)}</span>` : '';
-        const due = a.due ? `<span class="assignment-due${overdueClass}">${escapeHtml(a.due)}</span>` : '';
-        const title = escapeHtml(a.title) + (a.completed ? ' (done)' : '');
-        return `<div class="assignment-row" id="${a.id}">
-            <div>
-                <div class="assignment-title">${title}</div>
-                <div class="assignment-meta">${subj} ${due}</div>
-            </div>
-            <div class="assignment-actions">
-                <button onclick="toggleAssignmentComplete('${a.id}')">${a.completed ? 'Undo' : 'Complete'}</button>
-                <button onclick="removeAssignment('${a.id}')">Remove</button>
-            </div>
-        </div>`;
-    }).join('');
-}
-
 
     if (noteInput) {
         noteInput.addEventListener("input", updateLivePreview);
@@ -1189,4 +1189,20 @@ function updateSidebar() {
     if (attSubjectSelect) {
         attSubjectSelect.innerHTML = '<option value="">Subject</option>' + subjects.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
     }
+}
+
+/**
+ * Toggles a predefined tag in the tags input field
+ */
+function addQuickTag(tag) {
+    const tagsInput = document.getElementById("noteTags");
+    let currentTags = tagsInput.value.split(',').map(t => t.trim()).filter(t => t !== "");
+    
+    const tagIndex = currentTags.indexOf(tag);
+    if (tagIndex === -1) {
+        currentTags.push(tag);
+    } else {
+        currentTags.splice(tagIndex, 1);
+    }
+    tagsInput.value = currentTags.join(', ');
 }

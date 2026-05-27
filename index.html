@@ -156,7 +156,14 @@
           <textarea id="noteInput" placeholder="Write your note here... (Markdown supported)"></textarea>
           
           <div class="input-grid">
-            <input id="noteTags" placeholder="Tags (e.g. exam, lab)" />
+            <div class="tags-input-container">
+              <input id="noteTags" placeholder="Tags (e.g. exam, lab)" />
+              <div class="quick-tags">
+                <button type="button" class="tag-pill" onclick="addQuickTag('Study')">Study</button>
+                <button type="button" class="tag-pill" onclick="addQuickTag('Assignment')">Assignment</button>
+                <button type="button" class="tag-pill" onclick="addQuickTag('Revision')">Revision</button>
+              </div>
+            </div>
             <input id="noteSubject" placeholder="Subject" />
             <select id="noteFolder">
               <option value="">No folder</option>
@@ -377,6 +384,7 @@
     <div id="toastContainer" class="toast-container"></div>
 
 
+  <script src="script.js"></script>
 
   <!-- Markdown renderer and sanitizer -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
