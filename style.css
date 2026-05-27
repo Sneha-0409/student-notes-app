@@ -273,6 +273,13 @@ textarea{
                 border-color 0.3s ease;
 }
 
+textarea::placeholder{
+    color: color-mix(in srgb, var(--muted-text-color) 80%, transparent);
+
+
+textarea::placeholder{
+    color: color-mix(in srgb, var(--muted-text-color) 80%, transparent);
+
 
 textarea::placeholder{
     color: color-mix(in srgb, var(--muted-text-color) 80%, transparent);
@@ -552,6 +559,7 @@ button:hover {
     border: 1px solid #E5E7EB;
     box-shadow: var(--shadow-sm);
     transition: all 0.3s ease;
+
 }
 
 .secondary-btn:hover {

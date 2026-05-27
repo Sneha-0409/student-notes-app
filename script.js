@@ -59,15 +59,36 @@ function addNote() {
 
     let title = document.getElementById("noteTitle").value.trim();
     let input = document.getElementById("noteInput");
+    let titleInput = document.getElementById("noteTitle");
+    let tagsInput = document.getElementById("noteTags");
+    let subjectInput = document.getElementById("noteSubject");
+    
     let noteText = input.value.trim();
-    let tagsText = document.getElementById('noteTags').value.trim();
-    let subjectText = document.getElementById('noteSubject').value.trim();
-    let folderId = document.getElementById('noteFolder')?.value || '';
+    let titleText = titleInput.value.trim();
 
     if(noteText === ""){
         alert("Please enter a note");
         return;
     }
+
+
+    notes.push({ 
+        text: noteText, 
+        title: titleText,
+        tags: tagsInput.value,
+        subject: subjectInput.value,
+        date: "Created: " + new Date().toLocaleString() 
+    });
+
+    localStorage.setItem(
+        "notes",
+        JSON.stringify(notes)
+    );
+
+    input.value = "";
+    titleInput.value = "";
+    tagsInput.value = "";
+    subjectInput.value = "";
 
     let newNote = {
         id: Date.now(),
@@ -76,7 +97,6 @@ function addNote() {
     if (notes.some(n => n.text === noteText)) {
 
 
-    if (notes.includes(noteText)) {
 
 
     if(noteText === "" && titleText === ""){
